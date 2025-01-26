@@ -4,7 +4,7 @@ import { ACTOR_DIRECTION, ACTOR_STATE } from "../models/game-actor.models";
 
 const SPRITE_COL = 846;
 
-export const PACMAN_SPRITES_MAP = {
+export const PACMAN_SPRITE_MAP = {
   [ACTOR_STATE.IDLE]: {
     [ACTOR_DIRECTION.RIGHT]: [
       {

@@ -1,6 +1,7 @@
 import { Ghost } from "./ghost.entity";
 import { Player } from "./player.entity";
 import { Pacman } from "./pacman.entity";
+import { GHOST_COLORS } from "../models/ghost.model";
 import { DisplayDriver } from "../drivers/display.driver";
 import { PlayerControlsDriver } from "../drivers/player-controls.driver";
 
@@ -14,11 +15,11 @@ export class Game {
   private playerControlsDriver: PlayerControlsDriver;
 
   constructor({ context }: TGameConstructor) {
-    const ghost = new Ghost();
+    const ghost = new Ghost({ color: GHOST_COLORS.RED });
     const pacman = new Pacman();
     const actors = [ghost, pacman];
 
-    this.player = new Player({ nickname: "Jack", actor: pacman });
+    this.player = new Player({ nickname: "Jack", actor: ghost });
 
     this.displayDriver = new DisplayDriver({ context, actors });
 
