@@ -52,15 +52,14 @@ export class DisplayDriver extends BaseDriver {
     );
   }
 
-  protected clear() {
+  public clear(position: TCoordinates) {
     const canvas = this.context.canvas;
 
-    this.context.clearRect(0, 0, canvas.width, canvas.height);
+    this.context.clearRect(position.x, position.y, canvas.width, canvas.height);
   }
 
+  // TODO: Draw only visible actors
   public update() {
-    this.clear();
-
     this.actors.forEach((actor) => this.draw(actor.sprite, actor.position));
   }
 }

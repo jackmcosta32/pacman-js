@@ -57,6 +57,9 @@ export class Game {
 
     this.inputDriver.update();
     this.cameraDriver.update();
+
+    this.displayDriver.clear(this.cameraDriver.position);
+
     this.displayDriver.update();
   }
 

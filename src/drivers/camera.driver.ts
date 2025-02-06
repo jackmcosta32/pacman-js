@@ -31,12 +31,11 @@ export class CameraDriver extends BaseDriver {
     this.target = target;
   }
 
-  public move(targetPosition: TCoordinates, damping?: number) {
+  public move(position: TCoordinates, damping?: number) {
     const canvas = this.context.canvas;
 
-    this.position.x = Math.floor(canvas.width / 2 - targetPosition.x);
-    this.position.y = Math.floor(canvas.height / 2 - targetPosition.y);
-
+    this.position.x = Math.floor(position.x - canvas.width / 2);
+    this.position.y = Math.floor(position.y - canvas.height / 2);
     // TODO: Add camera damping option
   }
 
@@ -47,6 +46,6 @@ export class CameraDriver extends BaseDriver {
       this.move(this.target.boundingBoxCenterPosition);
     }
 
-    this.context.translate(this.position.x, this.position.y);
+    this.context.translate(-this.position.x, -this.position.y);
   }
 }
