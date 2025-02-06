@@ -34,9 +34,16 @@ export class CameraDriver extends BaseDriver {
   public move(position: TCoordinates, damping?: number) {
     const canvas = this.context.canvas;
 
-    this.position.x = Math.floor(position.x - canvas.width / 2);
-    this.position.y = Math.floor(position.y - canvas.height / 2);
-    // TODO: Add camera damping option
+    const targetX = Math.floor(position.x - canvas.width / 2);
+    const targetY = Math.floor(position.y - canvas.height / 2);
+
+    if (damping) {
+      this.position.x += Math.floor((targetX - this.position.x) * damping);
+      this.position.y += Math.floor((targetY - this.position.y) * damping);
+    } else {
+      this.position.x = targetX;
+      this.position.y = targetY;
+    }
   }
 
   public update() {
