@@ -5,7 +5,7 @@ export const FRAME_RATE = 12;
 export const SECONDS_PER_FRAME = 1000 / FRAME_RATE;
 
 // Camera Settings
-export const CAMERA_DEFAULT_DAMPING = 0.1;
+export const CAMERA_DEFAULT_DAMPING = 0.5;
 
 // UI Settings
 export const TILE_SIZE = 48;

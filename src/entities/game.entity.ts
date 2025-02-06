@@ -66,6 +66,7 @@ export class Game {
   public async run() {
     await this.init();
 
+    this.cameraDriver.move(this.player.actor.boundingBoxCenterPosition);
     this.cameraDriver.follow(this.player.actor);
     this.update(this.lastTimestamp);
   }
