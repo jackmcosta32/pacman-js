@@ -1,9 +1,9 @@
-import { BaseDriver } from "./base.driver";
-import type { TSprite } from "../models/animation.model";
-import { GameActor } from "../entities/game-actor.entity";
-import type { TCoordinates } from "../models/position.model";
-import { DriverNotReadyError } from "../errors/driver-not-ready.error";
-import { SECONDS_PER_FRAME, SPRITES_IMAGE_SRC } from "../config/game.config";
+import { BaseDriver } from './base.driver';
+import type { TSprite } from '../models/animation.model';
+import { GameActor } from '../entities/game-actor.entity';
+import { SPRITES_IMAGE_SRC } from '../config/game.config';
+import type { TCoordinates } from '../models/position.model';
+import { DriverNotReadyError } from '../errors/driver-not-ready.error';
 
 export interface TDisplayDriverConstructor {
   actors: GameActor[];
@@ -12,7 +12,6 @@ export interface TDisplayDriverConstructor {
 
 export class DisplayDriver extends BaseDriver {
   private actors: GameActor[];
-  private lastTimestamp: number;
   private sprites?: HTMLImageElement;
   private context: CanvasRenderingContext2D;
 
@@ -21,7 +20,6 @@ export class DisplayDriver extends BaseDriver {
 
     this.actors = actors;
     this.context = context;
-    this.lastTimestamp = performance.now();
   }
 
   public async init() {
@@ -38,7 +36,7 @@ export class DisplayDriver extends BaseDriver {
   // TODO: Handle pixel ratio
   public draw(sprite: TSprite, position: TCoordinates) {
     if (!this.sprites) {
-      throw new DriverNotReadyError({ driverName: "Display Driver" });
+      throw new DriverNotReadyError({ driverName: 'Display Driver' });
     }
 
     this.context.drawImage(
@@ -50,28 +48,18 @@ export class DisplayDriver extends BaseDriver {
       position.x,
       position.y,
       sprite.width,
-      sprite.height
+      sprite.height,
     );
   }
 
-  protected clearDisplay() {
+  protected clear() {
     const canvas = this.context.canvas;
 
     this.context.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  public updateDisplay(timestamp?: number) {
-    requestAnimationFrame((timestamp) => this.updateDisplay(timestamp));
-
-    if (timestamp) {
-      const elapsed = timestamp - this.lastTimestamp;
-
-      if (elapsed < SECONDS_PER_FRAME) return;
-
-      this.lastTimestamp = timestamp - (elapsed % SECONDS_PER_FRAME);
-    }
-
-    this.clearDisplay();
+  public update() {
+    this.clear();
 
     this.actors.forEach((actor) => this.draw(actor.sprite, actor.position));
   }
