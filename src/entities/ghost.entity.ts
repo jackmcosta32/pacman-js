@@ -20,7 +20,7 @@ const COLOR_TO_SPRITE_MAP = {
 export class Ghost extends GameActor {
   constructor({ color = GHOST_COLORS.RED }: TGhostConstructor) {
     super({
-      speed: TILE_SIZE / 18,
+      speed: Math.floor(TILE_SIZE / 10),
       position: { x: 128, y: 0 },
       spriteMap: COLOR_TO_SPRITE_MAP[color],
       boundingBox: { width: SPRITE_SIZE, height: SPRITE_SIZE },
