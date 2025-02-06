@@ -1,8 +1,8 @@
-import type { Keys } from "../types/util.type";
-import { GameActor } from "./game-actor.entity";
-import { TILE_SIZE } from "../config/game.config";
-import { GHOST_COLORS } from "../models/ghost.model";
-import * as GHOST_SPRITES from "../sprites/ghost.sprites";
+import type { Keys } from '../types/util.type';
+import { GameActor } from './game-actor.entity';
+import { GHOST_COLORS } from '../models/ghost.model';
+import * as GHOST_SPRITES from '../sprites/ghost.sprites';
+import { SPRITE_SIZE, TILE_SIZE } from '../config/game.config';
 
 export interface TGhostConstructor {
   color?: Keys<typeof GHOST_COLORS>;
@@ -23,6 +23,7 @@ export class Ghost extends GameActor {
       speed: TILE_SIZE / 18,
       position: { x: 128, y: 0 },
       spriteMap: COLOR_TO_SPRITE_MAP[color],
+      boundingBox: { width: SPRITE_SIZE, height: SPRITE_SIZE },
     });
   }
 }

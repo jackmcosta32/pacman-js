@@ -3,6 +3,7 @@ import { Player } from './player.entity';
 import { Pacman } from './pacman.entity';
 import { GHOST_COLORS } from '../models/ghost.model';
 import { InputDriver } from '../drivers/input.driver';
+import { CameraDriver } from '../drivers/camera.driver';
 import { SECONDS_PER_FRAME } from '../config/game.config';
 import { DisplayDriver } from '../drivers/display.driver';
 
@@ -14,6 +15,7 @@ export class Game {
   private player: Player;
   private lastTimestamp: number;
   private inputDriver: InputDriver;
+  private cameraDriver: CameraDriver;
   private displayDriver: DisplayDriver;
 
   constructor({ context }: TGameConstructor) {
@@ -24,6 +26,8 @@ export class Game {
     this.lastTimestamp = performance.now();
 
     this.player = new Player({ nickname: 'Jack', actor: ghost });
+
+    this.cameraDriver = new CameraDriver({ context, position: { x: 0, y: 0 } });
 
     this.displayDriver = new DisplayDriver({ context, actors });
 
@@ -36,6 +40,7 @@ export class Game {
   private async init() {
     await this.displayDriver.init();
 
+    this.cameraDriver.init();
     this.inputDriver.init();
   }
 
@@ -51,12 +56,14 @@ export class Game {
     }
 
     this.inputDriver.update();
+    this.cameraDriver.update();
     this.displayDriver.update();
   }
 
   public async run() {
     await this.init();
 
+    this.cameraDriver.follow(this.player.actor);
     this.update(this.lastTimestamp);
   }
 }

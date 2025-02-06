@@ -4,6 +4,9 @@ import type { TInputScheme } from '../models/input.model';
 export const FRAME_RATE = 12;
 export const SECONDS_PER_FRAME = 1000 / FRAME_RATE;
 
+// Camera Settings
+export const CAMERA_DEFAULT_DAMPING = 0.1;
+
 // UI Settings
 export const TILE_SIZE = 48;
 export const SPRITE_SIZE = 48;
