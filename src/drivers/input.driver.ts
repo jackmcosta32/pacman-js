@@ -18,7 +18,7 @@ export class InputDriver extends BaseDriver {
   protected inputScheme;
   protected keyThrottle;
   protected inputToActorDirectionMap;
-  protected commandStream: TCommand[] = [];
+  protected nextCommand?: TCommand;
 
   constructor({
     onMove,
@@ -70,7 +70,7 @@ export class InputDriver extends BaseDriver {
       execute: () => this.onMove!(direction),
     };
 
-    this.commandStream.push(movementCommand);
+    this.nextCommand = movementCommand;
   }
 
   private handleOnKeyUp(_: KeyboardEvent) {
@@ -80,7 +80,10 @@ export class InputDriver extends BaseDriver {
   }
 
   public update() {
-    this.commandStream.forEach((command) => command.execute());
-    this.commandStream = [];
+    if (!this.nextCommand?.execute) return;
+
+    this.nextCommand.execute();
+
+    this.nextCommand = undefined;
   }
 }
