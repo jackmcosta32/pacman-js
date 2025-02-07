@@ -38,7 +38,7 @@ export class CameraDriver extends BaseDriver {
     const targetX = Math.floor(position.x - canvas.width / 2);
     const targetY = Math.floor(position.y - canvas.height / 2);
 
-    if (damping) {
+    if (damping && this.position) {
       this.position.x += Math.floor((targetX - this.position.x) * damping);
       this.position.y += Math.floor((targetY - this.position.y) * damping);
     } else {
