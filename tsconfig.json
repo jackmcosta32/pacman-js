@@ -3,6 +3,7 @@
     "target": "ES2024",
     "useDefineForClassFields": true,
     "module": "ESNext",
+    "types": ["node"],
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
 
@@ -18,7 +19,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src"]
 }
