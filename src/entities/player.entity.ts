@@ -1,5 +1,5 @@
-import { GameActor } from "./game-actor.entity";
-import * as PLAYER_CONFIG from "../config/player.config";
+import { GameActor } from './game-actor.entity';
+import * as PLAYER_CONFIG from '@/config/player.config';
 
 export interface TPlayerConstructor {
   lives?: number;
@@ -12,11 +12,7 @@ export class Player {
   public actor: GameActor;
   public nickname: string;
 
-  constructor({
-    actor,
-    nickname,
-    lives = PLAYER_CONFIG.PLAYER_LIVES,
-  }: TPlayerConstructor) {
+  constructor({ actor, nickname, lives = PLAYER_CONFIG.PLAYER_LIVES }: TPlayerConstructor) {
     this.lives = lives;
     this.nickname = nickname;
     this.actor = actor;

@@ -1,7 +1,7 @@
 import { BaseDriver } from './base.driver';
-import type { TCoordinates } from '../models/position.model';
-import { CAMERA_DEFAULT_DAMPING } from '../config/game.config';
-import type { GameObject } from '../entities/game-object.entity';
+import type { TCoordinates } from '@/models/position.model';
+import { CAMERA_DEFAULT_DAMPING } from '@/config/game.config';
+import type { GameObject } from '@/entities/game-object.entity';
 
 export interface TCameraDriverConstructor {
   position: TCoordinates;
@@ -51,7 +51,7 @@ export class CameraDriver extends BaseDriver {
     this.context.resetTransform();
 
     if (this.target) {
-      this.move(this.target.boundingBoxCenterPosition, CAMERA_DEFAULT_DAMPING);
+      this.move(this.target.centerPosition, CAMERA_DEFAULT_DAMPING);
     }
 
     this.context.translate(-this.position.x, -this.position.y);

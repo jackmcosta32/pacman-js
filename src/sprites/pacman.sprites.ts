@@ -1,6 +1,6 @@
-import { SPRITE_SIZE } from "../config/game.config";
-import type { TSpriteMap } from "../models/animation.model";
-import { ACTOR_DIRECTION, ACTOR_STATE } from "../models/game-actor.models";
+import { SPRITE_SIZE } from '@/config/game.config';
+import type { TSpriteMap } from '@/models/animation.model';
+import { ACTOR_DIRECTION, ACTOR_STATE } from '@/models/game-actor.models';
 
 const SPRITE_COL = 846;
 

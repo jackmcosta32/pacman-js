@@ -1,6 +1,6 @@
-import { SPRITE_SIZE } from "../config/game.config";
-import type { TSpriteMap } from "../models/animation.model";
-import { ACTOR_DIRECTION, ACTOR_STATE } from "../models/game-actor.models";
+import { SPRITE_SIZE } from '@/config/game.config';
+import type { TSpriteMap } from '@/models/animation.model';
+import { ACTOR_DIRECTION, ACTOR_STATE } from '@/models/game-actor.models';
 
 const RED_GHOST_SPRITE_COL = 0;
 const PINK_GHOST_SPRITE_COL = 50;
@@ -232,14 +232,8 @@ export const PINK_GHOST_SPRITE_MAP = getGhostSpritesMap(PINK_GHOST_SPRITE_COL);
 
 export const BLUE_GHOST_SPRITE_MAP = getGhostSpritesMap(BLUE_GHOST_SPRITE_COL);
 
-export const ORANGE_GHOST_SPRITE_MAP = getGhostSpritesMap(
-  ORANGE_GHOST_SPRITE_COL
-);
+export const ORANGE_GHOST_SPRITE_MAP = getGhostSpritesMap(ORANGE_GHOST_SPRITE_COL);
 
-export const GREEN_GHOST_SPRITE_MAP = getGhostSpritesMap(
-  GREEN_GHOST_SPRITE_COL
-);
+export const GREEN_GHOST_SPRITE_MAP = getGhostSpritesMap(GREEN_GHOST_SPRITE_COL);
 
-export const PURPLE_GHOST_SPRITE_MAP = getGhostSpritesMap(
-  PURPLE_GHOST_SPRITE_COL
-);
+export const PURPLE_GHOST_SPRITE_MAP = getGhostSpritesMap(PURPLE_GHOST_SPRITE_COL);

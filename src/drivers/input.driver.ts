@@ -1,9 +1,9 @@
 import throttle from 'lodash/throttle';
 import { BaseDriver } from './base.driver';
-import type { TCommand } from '../models/command.model';
-import type { TInputScheme } from '../models/input.model';
-import { ACTOR_DIRECTION } from '../models/game-actor.models';
-import { INPUT_DEFAULT_SCHEME, INPUT_THROTTLE } from '../config/game.config';
+import type { TCommand } from '@/models/command.model';
+import type { TInputScheme } from '@/models/input.model';
+import { ACTOR_DIRECTION } from '@/models/game-actor.models';
+import { INPUT_DEFAULT_SCHEME, INPUT_THROTTLE } from '@/config/game.config';
 
 export interface TInputDriverConstructor {
   keyThrottle?: number;

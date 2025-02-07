@@ -1,4 +1,4 @@
-import type { TInputScheme } from '../models/input.model';
+import type { TInputScheme } from '@/models/input.model';
 
 // Display Settings
 export const FRAME_RATE = 12;

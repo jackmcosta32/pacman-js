@@ -1,11 +1,11 @@
 import { Ghost } from './ghost.entity';
 import { Player } from './player.entity';
 import { Pacman } from './pacman.entity';
-import { GHOST_COLORS } from '../models/ghost.model';
-import { InputDriver } from '../drivers/input.driver';
-import { CameraDriver } from '../drivers/camera.driver';
-import { SECONDS_PER_FRAME } from '../config/game.config';
-import { DisplayDriver } from '../drivers/display.driver';
+import { GHOST_COLORS } from '@/models/ghost.model';
+import { InputDriver } from '@/drivers/input.driver';
+import { CameraDriver } from '@/drivers/camera.driver';
+import { SECONDS_PER_FRAME } from '@/config/game.config';
+import { DisplayDriver } from '@/drivers/display.driver';
 
 export interface TGameConstructor {
   context: CanvasRenderingContext2D;
@@ -66,7 +66,7 @@ export class Game {
   public async run() {
     await this.init();
 
-    this.cameraDriver.move(this.player.actor.boundingBoxCenterPosition);
+    this.cameraDriver.move(this.player.actor.centerPosition);
     this.cameraDriver.follow(this.player.actor);
     this.update(this.lastTimestamp);
   }

@@ -1,30 +1,34 @@
-import type { TSprite } from '../models/animation.model';
-import { TBoundingBox } from '../models/bounding-box.model';
-import type { TCoordinates } from '../models/position.model';
+import type { TSprite } from '@/models/animation.model';
+import type { TCoordinates } from '@/models/position.model';
+import type { TBoundingBox } from '@/models/bounding-box.model';
 
 export interface TGameObjectConstructor {
-  position: TCoordinates;
   spriteFrame?: number;
   boundingBox: TBoundingBox;
 }
 
 export abstract class GameObject {
-  protected spriteFrame: number;
-  public position: TCoordinates;
-  public boundingBox: TBoundingBox;
+  public boundingBox;
+  protected spriteFrame;
 
-  constructor({ position, boundingBox, spriteFrame = 0 }: TGameObjectConstructor) {
-    this.position = position;
+  constructor({ boundingBox, spriteFrame = 0 }: TGameObjectConstructor) {
     this.spriteFrame = spriteFrame;
     this.boundingBox = boundingBox;
   }
 
   abstract get sprite(): TSprite;
 
-  public get boundingBoxCenterPosition(): TCoordinates {
+  public get position(): TCoordinates {
     return {
-      x: this.position.x + this.boundingBox.width / 2,
-      y: this.position.y + this.boundingBox.height / 2,
+      x: this.boundingBox.x,
+      y: this.boundingBox.y,
+    };
+  }
+
+  public get centerPosition(): TCoordinates {
+    return {
+      x: this.boundingBox.x + this.boundingBox.width / 2,
+      y: this.boundingBox.y + this.boundingBox.height / 2,
     };
   }
 }

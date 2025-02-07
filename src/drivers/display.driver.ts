@@ -1,9 +1,9 @@
 import { BaseDriver } from './base.driver';
-import type { TSprite } from '../models/animation.model';
-import { GameActor } from '../entities/game-actor.entity';
-import { SPRITES_IMAGE_SRC } from '../config/game.config';
-import type { TCoordinates } from '../models/position.model';
-import { DriverNotReadyError } from '../errors/driver-not-ready.error';
+import type { TSprite } from '@/models/animation.model';
+import { SPRITES_IMAGE_SRC } from '@/config/game.config';
+import type { TCoordinates } from '@/models/position.model';
+import type { GameActor } from '@/entities/game-actor.entity';
+import { DriverNotReadyError } from '@/errors/driver-not-ready.error';
 
 export interface TDisplayDriverConstructor {
   actors: GameActor[];

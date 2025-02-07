@@ -1,5 +1,5 @@
-import type { TSprite, TSpriteMap } from '../models/animation.model';
-import { ACTOR_DIRECTION, ACTOR_STATE } from '../models/game-actor.models';
+import type { TSprite, TSpriteMap } from '@/models/animation.model';
+import { ACTOR_DIRECTION, ACTOR_STATE } from '@/models/game-actor.models';
 import { GameObject, type TGameObjectConstructor } from './game-object.entity';
 
 export interface TGameActorConstructor extends TGameObjectConstructor {
@@ -27,16 +27,16 @@ export abstract class GameActor extends GameObject {
   public move(direction: ACTOR_DIRECTION) {
     switch (direction) {
       case ACTOR_DIRECTION.UP:
-        this.position.y -= this.speed;
+        this.boundingBox.y -= this.speed;
         break;
       case ACTOR_DIRECTION.DOWN:
-        this.position.y += this.speed;
+        this.boundingBox.y += this.speed;
         break;
       case ACTOR_DIRECTION.LEFT:
-        this.position.x -= this.speed;
+        this.boundingBox.x -= this.speed;
         break;
       case ACTOR_DIRECTION.RIGHT:
-        this.position.x += this.speed;
+        this.boundingBox.x += this.speed;
         break;
     }
 
