@@ -51,6 +51,7 @@ export abstract class GameActor extends GameObject {
     this.state = ACTOR_STATE.IDLE;
   }
 
+  // TODO: Refactor
   public get sprite(): TSprite {
     const nextSpriteGroup = this.spriteMap[this.state];
 

@@ -1,6 +1,7 @@
 import type { TInputScheme } from '@/models/input.model';
 
 // Display Settings
+// TODO: Fix application to run at 60 frames per second
 export const FRAME_RATE = 12;
 export const SECONDS_PER_FRAME = 1000 / FRAME_RATE;
 

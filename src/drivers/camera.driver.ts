@@ -2,6 +2,7 @@ import { BaseDriver } from './base.driver';
 import type { TCoordinates } from '@/models/position.model';
 import { CAMERA_DEFAULT_DAMPING } from '@/config/game.config';
 import type { GameObject } from '@/entities/game-object.entity';
+import type { TBoundingBox } from '@/models/bounding-box.model';
 
 export interface TCameraDriverConstructor {
   position: TCoordinates;
@@ -55,5 +56,14 @@ export class CameraDriver extends BaseDriver {
     }
 
     this.context.translate(-this.position.x, -this.position.y);
+  }
+
+  public get boundingBox(): TBoundingBox {
+    return {
+      x: this.position.x,
+      y: this.position.y,
+      width: this.context.canvas.width,
+      height: this.context.canvas.height,
+    };
   }
 }
