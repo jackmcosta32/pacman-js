@@ -3,12 +3,15 @@ import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
 
 export interface IQuadTreeConstructor {
   minSize?: ISize;
-  capacity: number;
+  parent?: QuadTree;
   isDivisive?: boolean;
+  branchCapacity: number;
   boundingBox: IBoundingBox;
+  references?: Map<string, [IBoundingBox, QuadTree]>;
 }
 
 export class QuadTree {
+  private divided = false;
   private isDivisive: boolean;
   private northeast?: QuadTree;
   private northwest?: QuadTree;
@@ -16,15 +19,18 @@ export class QuadTree {
   private southwest?: QuadTree;
   public boundingBox: IBoundingBox;
   private readonly minSize?: ISize;
-  private readonly capacity: number;
-  private divided = false;
-  private readonly elements = new Map<string, IBoundingBox>();
+  private readonly parent?: QuadTree;
+  private readonly branchCapacity: number;
+  private readonly references: Map<string, [IBoundingBox, QuadTree]>;
+  private readonly nodeIds = new Set<string>();
 
   constructor(params: IQuadTreeConstructor) {
+    this.parent = params.parent;
     this.minSize = params.minSize;
-    this.capacity = params.capacity;
     this.boundingBox = params.boundingBox;
+    this.branchCapacity = params.branchCapacity;
     this.isDivisive = params.isDivisive ?? true;
+    this.references = params.references ?? new Map<string, [IBoundingBox, QuadTree]>();
   }
 
   private intersects(boundingBoxA: IBoundingBox, boundingBoxB: IBoundingBox = this.boundingBox) {
@@ -54,47 +60,58 @@ export class QuadTree {
 
     this.northeast = new QuadTree({
       isDivisive,
+      parent: this,
       minSize: this.minSize,
-      capacity: this.capacity,
+      references: this.references,
+      branchCapacity: this.branchCapacity,
       boundingBox: { x, y, width, height },
     });
 
     this.northwest = new QuadTree({
       isDivisive,
+      parent: this,
       minSize: this.minSize,
-      capacity: this.capacity,
+      references: this.references,
+      branchCapacity: this.branchCapacity,
       boundingBox: { x: x + width, y, width, height },
     });
 
     this.southeast = new QuadTree({
       isDivisive,
+      parent: this,
       minSize: this.minSize,
-      capacity: this.capacity,
+      references: this.references,
+      branchCapacity: this.branchCapacity,
       boundingBox: { x, y: y + height, width, height },
     });
 
     this.southwest = new QuadTree({
       isDivisive,
+      parent: this,
       minSize: this.minSize,
-      capacity: this.capacity,
+      references: this.references,
+      branchCapacity: this.branchCapacity,
       boundingBox: { x: x + width, y: y + height, width, height },
     });
 
     this.divided = true;
 
-    for (const [id, boundingBox] of this.elements) {
-      this.insert(id, boundingBox);
+    for (const id of this.nodeIds) {
+      const [boundingBox] = this.references.get(id)!;
+      this.insertNode(id, boundingBox);
     }
 
-    this.elements.clear();
+    this.nodeIds.clear();
   }
 
-  public insert(id: string, boundingBox: IBoundingBox): boolean {
-    if (this.elements.has(id)) return true;
+  public insertNode(id: string, boundingBox: IBoundingBox): boolean {
+    if (this.references.has(id)) return false;
     if (!this.contains(boundingBox)) return false;
 
-    if (!this.isDivisive || (this.elements.size < this.capacity && !this.divided)) {
-      this.elements.set(id, boundingBox);
+    if (!this.isDivisive || (this.nodeIds.size < this.branchCapacity && !this.divided)) {
+      this.nodeIds.add(id);
+      this.references.set(id, [boundingBox, this]);
+
       return true;
     }
 
@@ -103,19 +120,52 @@ export class QuadTree {
     }
 
     return (
-      this.northeast!.insert(id, boundingBox) ||
-      this.northwest!.insert(id, boundingBox) ||
-      this.southeast!.insert(id, boundingBox) ||
-      this.southwest!.insert(id, boundingBox)
+      this.northeast!.insertNode(id, boundingBox) ||
+      this.northwest!.insertNode(id, boundingBox) ||
+      this.southeast!.insertNode(id, boundingBox) ||
+      this.southwest!.insertNode(id, boundingBox)
     );
   }
 
+  public deleteNode(id: string): boolean {
+    const element = this.references.get(id);
+
+    if (!element) return false;
+
+    const [_, branch] = element;
+
+    branch.nodeIds.delete(id);
+    this.references.delete(id);
+
+    return true;
+  }
+
+  public updateNode(id: string, boundingBox: IBoundingBox): boolean {
+    const element = this.references.get(id);
+
+    if (!element) return false;
+
+    const [_, branch] = element;
+
+    branch.nodeIds.delete(id);
+
+    const inserted = this.insertNode(id, boundingBox);
+
+    if (inserted) return true;
+
+    if (!this.parent) return false;
+
+    return this.parent.updateNode(id, boundingBox);
+  }
+
   public query(range: IBoundingBox, found: string[] = []): string[] {
-    if (!this.divided && !this.elements.size) return found;
+    if (!this.divided && !this.nodeIds.size) return found;
 
     if (!this.intersects(this.boundingBox, range)) return found;
 
-    for (const [id, boundingBox] of this.elements) {
+    for (const id of this.nodeIds) {
+      const [boundingBox] = this.references.get(id)!;
+
       if (this.intersects(boundingBox, range)) {
         found.push(id);
       }
@@ -132,7 +182,8 @@ export class QuadTree {
   }
 
   public clear() {
-    this.elements.clear();
+    this.nodeIds.clear();
+    this.references.clear();
     this.divided = false;
     this.isDivisive = true;
     this.northeast = undefined;
