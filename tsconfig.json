@@ -24,8 +24,8 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
+      "@tests/*": ["src/tests/*"],
       "@pacman/*": ["src/app/pacman/*"],
-      "@tests/*": ["src/packages/tests/*"],
       "@shared/*": ["src/packages/shared/*"],
       "@game-client/*": ["src/packages/game-client/*"],
       "@game-engine/*": ["src/packages/game-engine/*"],

@@ -8,8 +8,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@tests': path.resolve(__dirname, './src/tests'),
       '@pacman': path.resolve(__dirname, './src/app/pacman'),
-      '@tests': path.resolve(__dirname, './src/packages/tests'),
       '@shared': path.resolve(__dirname, './src/packages/shared'),
       '@game-client': path.resolve(__dirname, './src/packages/game-client'),
       '@game-engine': path.resolve(__dirname, './src/packages/game-engine'),
