@@ -1,9 +1,9 @@
-import type { IComponent, IEntity } from '@game-engine/interfaces/entity.interface';
+import type { IComponent, IComponentConstructor } from '@game-engine/interfaces/entity.interface';
 
 export abstract class Component implements IComponent {
-  public abstract name: string;
+  public static readonly type: string;
 
-  public abstract init(): void;
-
-  public abstract update(timestamp: number, entity: IEntity): void;
+  public get type() {
+    return (this.constructor as IComponentConstructor<IComponent>).type;
+  }
 }

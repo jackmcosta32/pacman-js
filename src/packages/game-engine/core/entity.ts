@@ -1,36 +1,37 @@
-import type { IEntity, IComponent } from '@game-engine/interfaces/entity.interface';
+import type { IEntity, IComponent, IComponentConstructor } from '@game-engine/interfaces/entity.interface';
 
 export interface IEntityConstructor {
   id: string;
+  components?: IComponent[];
 }
 
 export class Entity implements IEntity {
-  protected _id: string;
+  public readonly id: string;
   protected components = new Map<string, IComponent>();
 
   constructor(params: IEntityConstructor) {
-    this._id = params.id;
-  }
+    this.id = params.id;
 
-  public get id() {
-    return this._id;
-  }
-
-  public update(timestamp: number) {
-    for (const component of this.components.values()) {
-      component.update(timestamp, this);
-    }
+    params.components?.forEach((component) => this.addComponent(component));
   }
 
   public addComponent(component: IComponent) {
-    this.components.set(component.name, component);
+    if (this.components.has(component.type)) return false;
+
+    this.components.set(component.type, component);
+
+    return true;
   }
 
-  public getComponent(name: string) {
-    return this.components.get(name);
+  public getComponent<Component extends IComponent>(constructor: IComponentConstructor<Component>): Component {
+    return this.components.get(constructor.type) as Component;
   }
 
-  public removeComponent(name: string) {
-    this.components.delete(name);
+  public removeComponent<Component extends IComponent>(constructor: IComponentConstructor<Component>) {
+    if (!this.components.has(constructor.type)) return false;
+
+    this.components.delete(constructor.type);
+
+    return true;
   }
 }

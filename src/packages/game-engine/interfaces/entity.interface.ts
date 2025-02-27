@@ -1,14 +1,16 @@
+import type { Constructor } from '@shared/types/util.type';
+
+export interface IComponentConstructor<Component> extends Constructor<Component> {
+  type: string;
+}
+
 export interface IComponent {
-  name: string;
-  init(): void;
-  update(timestamp: number, entity: IEntity): void;
+  type: string;
 }
 
 export interface IEntity {
   id: string;
-  init(): void;
-  update(timestamp: number): void;
-  addComponent(component: IComponent): void;
-  removeComponent(component: IComponent): void;
-  getComponent(name: string): IComponent | undefined;
+  addComponent(component: IComponent): boolean;
+  removeComponent<Component extends IComponent>(component: IComponentConstructor<Component>): boolean;
+  getComponent<Component extends IComponent>(constructor: IComponentConstructor<Component>): Component | undefined;
 }

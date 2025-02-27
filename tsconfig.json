@@ -24,7 +24,12 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@pacman/*": ["src/app/pacman/*"],
+      "@tests/*": ["src/packages/tests/*"],
+      "@shared/*": ["src/packages/shared/*"],
+      "@game-client/*": ["src/packages/game-client/*"],
+      "@game-engine/*": ["src/packages/game-engine/*"],
+      "@game-application/*": ["src/packages/game-engine/*"]
     }
   },
   "include": ["src"]
