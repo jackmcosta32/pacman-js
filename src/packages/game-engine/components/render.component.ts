@@ -1,4 +1,5 @@
 import { Component } from '@game-engine/core/component';
+import { COMPONENT_TYPE } from '@game-engine/constants/component.constant';
 import type { ISprite, ISpriteMap } from '@shared/interfaces/graphics.interface';
 
 export interface IRenderComponentConstructor {
@@ -6,7 +7,7 @@ export interface IRenderComponentConstructor {
 }
 
 export class RenderComponent extends Component {
-  public static readonly type = 'RENDER_COMPONENT';
+  public static readonly type = COMPONENT_TYPE.RENDER_COMPONENT;
 
   private animationFrame: number = 0;
   private readonly spriteMap: ISpriteMap<string>;

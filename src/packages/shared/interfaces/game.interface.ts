@@ -1,20 +1,14 @@
-import type { Callback, Values } from '@shared/types/util.type';
-import type { IScene } from '@game-engine/interfaces/scene.interface';
-import type { IObserver } from '@shared/interfaces/observer.interface';
-import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
+import type { IInputEvent } from '@shared/interfaces/event.interface';
+import type { ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
-export const BASE_GAME_EVENTS = {
-  DRAW_SPRITE: 'DrawSprite',
-  LOAD_SPRITE_SHEET: 'LoadSpriteSheet',
-};
+export interface IGameState {
+  timestamp: number;
+  entities: ISerializedEntity[];
+}
 
-export type IBaseGameEvent = Values<typeof BASE_GAME_EVENTS>;
-
-export interface IGame<Events extends string = string, Listener extends Callback = Callback>
-  extends IObserver<Events, Listener> {
+export interface IGame {
   init(): void;
   start(): void;
-  update(): void;
   destroy(): void;
-  getActiveScenes(viewport: IBoundingBox): IScene[];
+  update(inputEvents: IInputEvent[]): IGameState;
 }

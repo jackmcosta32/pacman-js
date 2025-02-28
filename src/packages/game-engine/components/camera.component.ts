@@ -1,4 +1,6 @@
 import { Component } from '@game-engine/core/component';
+import { COMPONENT_TYPE } from '@game-engine/constants/component.constant';
+import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import type { IBoundingBox, ICoordinate } from '@shared/interfaces/coordinate.interface';
 
 export interface ICameraComponentConstructor {
@@ -6,6 +8,8 @@ export interface ICameraComponentConstructor {
 }
 
 export class CameraComponent extends Component {
+  public static readonly type = COMPONENT_TYPE.CAMERA_COMPONENT;
+
   public readonly viewport: IBoundingBox;
 
   constructor(params: ICameraComponentConstructor) {
@@ -25,5 +29,12 @@ export class CameraComponent extends Component {
       this.viewport.x = targetX;
       this.viewport.y = targetY;
     }
+  }
+
+  public serialize(): ISerializedComponent {
+    return {
+      type: this.type,
+      viewport: this.viewport,
+    };
   }
 }

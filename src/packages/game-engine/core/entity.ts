@@ -1,4 +1,10 @@
-import type { IEntity, IComponent, IComponentConstructor } from '@game-engine/interfaces/entity.interface';
+import type {
+  IEntity,
+  IComponent,
+  ISerializedEntity,
+  IComponentConstructor,
+  ISerializedComponent,
+} from '@game-engine/interfaces/entity.interface';
 
 export interface IEntityConstructor {
   id: string;
@@ -33,5 +39,18 @@ export class Entity implements IEntity {
     this.components.delete(constructor.type);
 
     return true;
+  }
+
+  public serialize(): ISerializedEntity {
+    const serializedComponents: Record<string, ISerializedComponent> = {};
+
+    this.components.forEach((component, type) => {
+      serializedComponents[type] = component.serialize();
+    });
+
+    return {
+      id: this.id,
+      components: serializedComponents,
+    };
   }
 }
