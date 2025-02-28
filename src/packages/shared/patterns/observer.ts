@@ -1,23 +1,26 @@
 import type { Callback } from '@shared/types/util.type';
+import type { IObserver } from '@shared/interfaces/observer.interface';
 
-export abstract class Observer {
-  protected abstract subscriptions: Map<string, Set<Callback>>;
+export abstract class Observer implements IObserver {
+  protected abstract subscriptions: Set<Callback>;
 
-  public subscribe(event: string, listener: Callback) {
-    const listeners = this.subscriptions.get(event) ?? new Set();
+  public subscribe(listener: Callback) {
+    if (this.subscriptions.has(listener)) return false;
 
-    listeners.add(listener);
+    this.subscriptions.add(listener);
+
+    return true;
   }
 
-  public unsubscribe(event: string, listener: Callback) {
-    const listeners = this.subscriptions.get(event);
+  public unsubscribe(listener: Callback) {
+    if (!this.subscriptions.has(listener)) return false;
 
-    listeners?.delete(listener);
+    this.subscriptions.delete(listener);
+
+    return true;
   }
 
-  protected notify(event: string, data: Parameters<Callback>) {
-    const listeners = this.subscriptions.get(event);
-
-    listeners?.forEach((listener) => listener(data));
+  protected notify(data: Parameters<Callback>) {
+    this.subscriptions.forEach((listener) => listener(data));
   }
 }

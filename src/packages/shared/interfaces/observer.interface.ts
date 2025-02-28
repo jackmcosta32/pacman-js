@@ -1,6 +1,11 @@
-import { Callback } from '@shared/types/util.type';
+import type { Callback } from '@shared/types/util.type';
 
-export interface IObserver<Event extends string = string, Listener extends Callback = Callback> {
+export interface IObserver<Listener = Callback> {
+  subscribe(listener: Listener): void;
+  unsubscribe(listener: Listener): void;
+}
+
+export interface IMultiSubjectObserver<Event = string, Listener = Callback> {
   subscribe(event: Event, listener: Listener): void;
   unsubscribe(event: Event, listener: Listener): void;
 }
