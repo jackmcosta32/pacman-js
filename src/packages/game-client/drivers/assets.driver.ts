@@ -5,7 +5,11 @@ export class AssetsDriver implements IAssetsDriver {
   private readonly assets = new Map<string, HTMLElement | FontFace>();
 
   public getAsset(id: string) {
-    return this.assets.get(id);
+    const asset = this.assets.get(id);
+
+    if (!asset) throw new Error(`Could not find an asset with ID ${id}`);
+
+    return asset;
   }
 
   public async loadSpriteSheet(asset: IAsset): Promise<boolean> {

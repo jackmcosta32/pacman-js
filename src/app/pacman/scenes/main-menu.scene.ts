@@ -8,10 +8,26 @@ export const MainMenuScene = new Scene({
   entities: [
     TextEntityFactory.make({
       color: 'white',
+      fontSize: 32,
+      fontFamily: MENU_FONT.id,
+      innerText: 'Pacman Game',
+      position: { x: 50, y: 50 },
+      size: { height: 16, width: 100 },
+    }),
+    TextEntityFactory.make({
+      color: 'white',
       fontSize: 12,
       fontFamily: MENU_FONT.id,
-      innerText: 'Hello World',
-      position: { x: 50, y: 50 },
+      innerText: 'Start',
+      position: { x: 50, y: 80 },
+      size: { height: 16, width: 100 },
+    }),
+    TextEntityFactory.make({
+      color: 'white',
+      fontSize: 12,
+      fontFamily: MENU_FONT.id,
+      innerText: 'Exit',
+      position: { x: 50, y: 110 },
       size: { height: 16, width: 100 },
     }),
   ],

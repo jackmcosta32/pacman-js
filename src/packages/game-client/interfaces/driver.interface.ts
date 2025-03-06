@@ -4,7 +4,7 @@ import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.in
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
 
 export interface IAssetsDriver {
-  getAsset(id: string): HTMLElement | FontFace | undefined;
+  getAsset(id: string): HTMLElement | FontFace;
   loadAudio(asset: IAsset): Promise<boolean>;
   loadSpriteSheet(asset: IAsset): Promise<boolean>;
   loadFontFace(family: string, asset: IAsset): Promise<boolean>;

@@ -5,6 +5,7 @@ import type { IGame } from '@shared/interfaces/game.interface';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
 import type { ISerializedUIComponent } from '@game-engine/components/ui.component';
+import type { ISerializedSpriteComponent } from '@game-engine/components/sprite.component';
 import type { ISerializedPositionComponent } from '@game-engine/components/position.component';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
 
@@ -36,6 +37,7 @@ export class PacmanGameClient implements IGameClient {
 
     scene.entities.forEach((entity) => {
       const uiComponent = entity.components[COMPONENT_TYPE.UI_COMPONENT] as ISerializedUIComponent;
+      const spriteComponent = entity.components[COMPONENT_TYPE.SPRITE_COMPONENT] as ISerializedSpriteComponent;
       const positionComponent = entity.components[COMPONENT_TYPE.POSITION_COMPONENT] as ISerializedPositionComponent;
 
       if (uiComponent && positionComponent) {
@@ -43,6 +45,13 @@ export class PacmanGameClient implements IGameClient {
         const { position } = positionComponent;
 
         if (innerText) this.graphicsDriver.drawText(innerText, position, typographyOptions);
+      }
+
+      if (spriteComponent && positionComponent) {
+        const { sprite } = spriteComponent;
+        const { position } = positionComponent;
+
+        this.graphicsDriver.drawSprite(sprite, position);
       }
     });
   }

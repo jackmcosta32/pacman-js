@@ -1,15 +1,21 @@
 import { Component } from '@game-engine/core/component';
-import { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ISprite, ISpriteMap } from '@shared/interfaces/graphics.interface';
+import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 
 export interface ISpriteComponentConstructor {
+  animationSequence: string;
   spriteMap: ISpriteMap<string>;
 }
 
-export class SpriteComponent extends Component {
-  public static readonly type = COMPONENT_TYPE.RENDER_COMPONENT;
+export interface ISerializedSpriteComponent extends ISerializedComponent {
+  sprite: ISprite;
+}
 
+export class SpriteComponent extends Component {
+  public static readonly type = COMPONENT_TYPE.SPRITE_COMPONENT;
+
+  private animationSequence: string;
   private animationFrame: number = 0;
   private readonly spriteMap: ISpriteMap<string>;
 
@@ -17,14 +23,28 @@ export class SpriteComponent extends Component {
     super();
 
     this.spriteMap = params.spriteMap;
+    this.animationSequence = params.animationSequence;
   }
 
   public resetAnimationFrame() {
     this.animationFrame = 0;
   }
 
-  public getCurrentSprite(sequence: string): ISprite {
-    const spriteFrames = this.spriteMap[sequence];
+  public updateAnimationFrame() {
+    const nextAnimationFrame = this.animationFrame + 1;
+    const spriteFrames = this.spriteMap[this.animationSequence];
+
+    if (!Array.isArray(spriteFrames) || !spriteFrames.length) this.animationFrame = 0;
+    else if (nextAnimationFrame < spriteFrames.length) this.animationFrame += 1;
+    else this.animationFrame = 0;
+  }
+
+  public updateAnimationSequence(animationSequence: string) {
+    this.animationSequence = animationSequence;
+  }
+
+  public get sprite(): ISprite {
+    const spriteFrames = this.spriteMap[this.animationSequence];
 
     if (!Array.isArray(spriteFrames)) return spriteFrames;
 
@@ -36,7 +56,7 @@ export class SpriteComponent extends Component {
   public serialize(): ISerializedComponent {
     return {
       type: this.type,
-      // I still need to implement a way to get those animations
+      sprite: this.sprite,
     };
   }
 }

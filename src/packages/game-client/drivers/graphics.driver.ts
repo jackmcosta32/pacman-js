@@ -1,29 +1,27 @@
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
-import type { IGraphicsDriver } from '@game-client/interfaces/driver.interface';
 import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
+import type { IAssetsDriver, IGraphicsDriver } from '@game-client/interfaces/driver.interface';
 
 export interface IGraphicsDriverConstructor {
+  assetsDriver: IAssetsDriver;
   context: CanvasRenderingContext2D;
 }
 
 export class GraphicsDriver implements IGraphicsDriver {
+  private readonly assetsDriver: IAssetsDriver;
   private readonly context: CanvasRenderingContext2D;
-  private readonly assets = new Map<string, HTMLImageElement>();
 
   constructor(params: IGraphicsDriverConstructor) {
     this.context = params.context;
+    this.assetsDriver = params.assetsDriver;
   }
 
   // TODO: Handle pixel ratio
   public drawSprite(sprite: ISprite, position: ICoordinate) {
-    const asset = this.assets.get(sprite.spriteSheetId);
-
-    if (!asset) {
-      throw new Error(`Could not find an asset with ID ${sprite.spriteSheetId}`);
-    }
+    const asset = this.assetsDriver.getAsset(sprite.spriteSheetId);
 
     this.context.drawImage(
-      asset,
+      asset as HTMLImageElement,
       sprite.x,
       sprite.y,
       sprite.width,

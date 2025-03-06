@@ -9,13 +9,17 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
 
 if (context) {
+  const inputDriver = new InputDriver();
+  const assetsDriver = new AssetsDriver();
+  const graphicsDriver = new GraphicsDriver({ context, assetsDriver });
+
   const pacmanGame = new PacmanGame();
 
   const gameClient = new PacmanGameClient({
+    inputDriver,
+    assetsDriver,
+    graphicsDriver,
     game: pacmanGame,
-    inputDriver: new InputDriver(),
-    assetsDriver: new AssetsDriver(),
-    graphicsDriver: new GraphicsDriver({ context }),
   });
 
   gameClient.start();
