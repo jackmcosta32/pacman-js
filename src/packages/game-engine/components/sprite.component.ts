@@ -3,17 +3,17 @@ import { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ISprite, ISpriteMap } from '@shared/interfaces/graphics.interface';
 
-export interface IRenderComponentConstructor {
+export interface ISpriteComponentConstructor {
   spriteMap: ISpriteMap<string>;
 }
 
-export class RenderComponent extends Component {
+export class SpriteComponent extends Component {
   public static readonly type = COMPONENT_TYPE.RENDER_COMPONENT;
 
   private animationFrame: number = 0;
   private readonly spriteMap: ISpriteMap<string>;
 
-  constructor(params: IRenderComponentConstructor) {
+  constructor(params: ISpriteComponentConstructor) {
     super();
 
     this.spriteMap = params.spriteMap;

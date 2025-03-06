@@ -1,5 +1,5 @@
 import { Component } from '@game-engine/core/component';
-import { COMPONENT_TYPE } from '@game-engine/constants/component.constant';
+import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import type { IBoundingBox, ICoordinate } from '@shared/interfaces/coordinate.interface';
 

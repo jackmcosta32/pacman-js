@@ -1,6 +1,6 @@
-import type { ISprite } from '@shared/interfaces/graphics.interface';
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
 import type { IGraphicsDriver } from '@game-client/interfaces/driver.interface';
+import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
 
 export interface IGraphicsDriverConstructor {
   context: CanvasRenderingContext2D;
@@ -33,6 +33,22 @@ export class GraphicsDriver implements IGraphicsDriver {
       sprite.width,
       sprite.height,
     );
+  }
+
+  public drawText(text: string, position: ICoordinate, options: Partial<ITypographyOptions> = {}) {
+    const fontSize = options.fontSize ?? 12;
+    const fontColor = options.color ?? 'white';
+    const fontFamily = options.fontFamily ?? 'serif';
+
+    if (options.textAlign) this.context.textAlign = options.textAlign;
+    if (options.textBaseline) this.context.textBaseline = options.textBaseline;
+    if (options.textRendering) this.context.textRendering = options.textRendering;
+
+    this.context.fillStyle = fontColor;
+    this.context.strokeStyle = fontColor;
+    this.context.font = `${fontSize}px ${fontFamily}`;
+
+    this.context.fillText(text, position.x, position.y);
   }
 
   public clear(position: ICoordinate) {

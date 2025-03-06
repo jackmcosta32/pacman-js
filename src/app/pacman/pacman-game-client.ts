@@ -1,9 +1,12 @@
-import { ACTOR_SPRITES } from './config/asset.configs';
 import { SECONDS_PER_FRAME } from './config/game.config';
+import { ACTOR_SPRITES, MENU_FONT } from './config/asset.configs';
+import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { IGame } from '@shared/interfaces/game.interface';
+import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
+import type { ISerializedUIComponent } from '@game-engine/components/ui.component';
+import type { ISerializedPositionComponent } from '@game-engine/components/position.component';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
-import { COMPONENT_TYPE } from '@game-engine/constants/component.constant';
 
 export interface IPacmanGameClientConstructor {
   game: IGame;
@@ -26,7 +29,27 @@ export class PacmanGameClient implements IGameClient {
     this.graphicsDriver = params.graphicsDriver;
   }
 
-  protected update(timestamp?: number) {
+  private syncGameScene(scene: ISerializedScene) {
+    // I will need two states, one that runs in the client
+    // and another that runs in the server/isolated
+    if (!scene.entities) return;
+
+    scene.entities.forEach((entity) => {
+      const uiComponent = entity.components[COMPONENT_TYPE.UI_COMPONENT] as ISerializedUIComponent;
+      const positionComponent = entity.components[COMPONENT_TYPE.POSITION_COMPONENT] as ISerializedPositionComponent;
+
+      if (uiComponent && positionComponent) {
+        const { innerText, ...typographyOptions } = uiComponent;
+        const { position } = positionComponent;
+
+        if (innerText) this.graphicsDriver.drawText(innerText, position, typographyOptions);
+      }
+    });
+  }
+
+  private update(timestamp?: number) {
+    requestAnimationFrame((timestamp) => this.update(timestamp));
+
     if (timestamp) {
       const elapsed = timestamp - this.lastTimestamp;
 
@@ -35,26 +58,26 @@ export class PacmanGameClient implements IGameClient {
       this.lastTimestamp = timestamp - (elapsed % SECONDS_PER_FRAME);
     }
 
-    const inputEvents = this.inputDriver.readInputStream();
-    const gameState = this.game.update({ timestamp, inputEvents });
+    const inputs = this.inputDriver.readInputStream();
 
-    gameState.entities.forEach((entity) => {
-      const renderComponent = entity.components[COMPONENT_TYPE.RENDER_COMPONENT];
-      const positionComponent = entity.components[COMPONENT_TYPE.POSITION_COMPONENT];
-
-      if (!renderComponent || !positionComponent) return;
-
-      this.graphicsDriver.drawSprite(sprite, position);
-    });
+    this.game.readInputs(inputs);
 
     this.inputDriver.clearInputStream();
+
+    this.game.update();
   }
 
   public async start() {
     this.inputDriver.init();
 
-    await this.assetsDriver.loadSpriteSheet(ACTOR_SPRITES);
+    await Promise.all([
+      this.assetsDriver.loadSpriteSheet(ACTOR_SPRITES),
+      this.assetsDriver.loadFontFace(MENU_FONT.id, MENU_FONT),
+    ]);
 
+    this.game.subscribe((scene) => this.syncGameScene(scene));
     this.game.start();
+
+    this.update();
   }
 }

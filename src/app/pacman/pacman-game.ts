@@ -1,50 +1,41 @@
-import { Game } from '@game-engine/game';
+import { Observer } from '@shared/patterns/observer';
+import { MainMenuScene } from './scenes/main-menu.scene';
 import type { Callback } from '@shared/types/util.type';
-import type { ISprite } from '@shared/interfaces/graphics.interface';
-import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
-import { Entity } from '@game-engine/core/entity';
-import { PositionComponent } from '@game-engine/components/position.component';
-import { RenderComponent } from '@game-engine/components/render.component';
-import { PACMAN_SPRITE_MAP } from '@pacman/sprites/pacman.sprites';
+import type { IGame } from '@shared/interfaces/game.interface';
+import type { IInputEvent } from '@shared/interfaces/event.interface';
+import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
-export interface IGameState {
-  graphics: [ISprite, ICoordinate][];
-}
+// The game has one or more scenes
+// Each scene has one or more entities
+// Each scene has one or more systems
+// Each entity has one or more components
 
-export class PacmanGame extends Game {
-  private currentState: string;
-  private player;
-  protected subscriptions = new Map<string, Set<Callback>>();
+export class PacmanGame extends Observer<Callback<ISerializedScene>> implements IGame {
+  private currentScene: IScene | undefined;
 
-  init(): void {
-    const positionComponent = new PositionComponent({
-      position: { x: 0, y: 0 },
-      size: { width: 48, height: 48 },
-    });
-
-    const renderComponent = new RenderComponent({
-      spriteMap: PACMAN_SPRITE_MAP,
-    });
-
-    const pacmanEntity = new Entity({
-      id: 'Pacman',
-      components: [positionComponent, renderComponent],
-    });
-
-    this.player = pacmanEntity;
+  public loadScene(id: string): void {
+    this.currentScene = MainMenuScene;
   }
 
-  start(): void {
+  public init(): void {
     throw new Error('Method not implemented.');
   }
 
-  update(params: { timestamp: number; inputEvent: unknown }): IGameState {
-    return {
-      graphics,
-    };
+  public start(): void {
+    this.currentScene = MainMenuScene;
   }
 
-  destroy(): void {
+  public update(): void {
+    if (!this.currentScene) {
+      throw new Error('Scene not initialized');
+    }
+
+    this.notify(this.currentScene.serialize());
+  }
+
+  public destroy(): void {
     throw new Error('Method not implemented.');
   }
+
+  public readInputs(inputs: IInputEvent[]): void {}
 }

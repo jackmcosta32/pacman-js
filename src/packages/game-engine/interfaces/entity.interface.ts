@@ -26,3 +26,11 @@ export interface IEntity {
   removeComponent<Component extends IComponent>(component: IComponentConstructor<Component>): boolean;
   getComponent<Component extends IComponent>(constructor: IComponentConstructor<Component>): Component | undefined;
 }
+
+export interface IEntityManager {
+  clear(): void;
+  hasEntity(id: string): boolean;
+  removeEntity(id: string): boolean;
+  addEntity(entity: IEntity): boolean;
+  getEntities(): MapIterator<IEntity>;
+}

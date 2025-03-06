@@ -1,14 +1,12 @@
+import type { Callback } from '@shared/types/util.type';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
-import type { ISerializedEntity } from '@game-engine/interfaces/entity.interface';
+import type { IObserver } from '@shared/interfaces/observer.interface';
+import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
-export interface IGameState {
-  timestamp: number;
-  entities: ISerializedEntity[];
-}
-
-export interface IGame {
+export interface IGame extends IObserver<Callback<ISerializedScene>> {
   init(): void;
   start(): void;
+  update(): void;
   destroy(): void;
-  update(inputEvents: IInputEvent[]): IGameState;
+  readInputs(inputs: IInputEvent[]): void;
 }

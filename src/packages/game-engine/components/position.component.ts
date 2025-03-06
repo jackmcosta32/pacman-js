@@ -1,12 +1,18 @@
 import { Component } from '@game-engine/core/component';
 import type { ISize } from '@shared/interfaces/geometry.interface';
-import { COMPONENT_TYPE } from '@game-engine/constants/component.constant';
+import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import type { IBoundingBox, ICoordinate } from '@shared/interfaces/coordinate.interface';
 
 export interface IPositionComponentConstructor {
   size: ISize;
   position: ICoordinate;
+}
+
+export interface ISerializedPositionComponent extends ISerializedComponent {
+  position: ICoordinate;
+  boundingBox: IBoundingBox;
+  centerPosition: ICoordinate;
 }
 
 export class PositionComponent extends Component {
@@ -48,7 +54,7 @@ export class PositionComponent extends Component {
     }
   }
 
-  public serialize(): ISerializedComponent {
+  public serialize(): ISerializedPositionComponent {
     return {
       type: this.type,
       position: this.position,

@@ -1,9 +1,9 @@
 import { QuadTree } from '@shared/data-structures/quad-tree';
 import type { ISize } from '@shared/interfaces/geometry.interface';
-import type { IScene } from '@game-engine/interfaces/scene.interface';
 import type { IEntity } from '@game-engine/interfaces/entity.interface';
 import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
 import { PositionComponent } from '@game-engine/components/position.component';
+import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
   size: ISize;
@@ -11,10 +11,13 @@ export interface ISceneConstructor {
 }
 
 export class Scene implements IScene {
+  protected readonly size;
   protected readonly quadTree;
   protected readonly entities = new Map<string, IEntity>();
 
   constructor(params: ISceneConstructor) {
+    this.size = params.size;
+
     this.quadTree = new QuadTree({
       branchCapacity: 50,
       boundingBox: {
@@ -60,9 +63,22 @@ export class Scene implements IScene {
     });
   }
 
-  public getSceneSlice(range: IBoundingBox) {
-    const sceneEntitiesIds = this.quadTree.query(range);
+  public getSceneSlice(viewport: IBoundingBox) {
+    const sceneEntitiesIds = this.quadTree.query(viewport);
 
     return sceneEntitiesIds.map((id) => this.entities.get(id)!);
+  }
+
+  public serialize(): ISerializedScene {
+    const serializedEntities = [];
+
+    for (const entity of this.entities.values()) {
+      serializedEntities.push(entity.serialize());
+    }
+
+    return {
+      size: this.size,
+      entities: serializedEntities,
+    };
   }
 }

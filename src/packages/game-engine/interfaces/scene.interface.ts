@@ -1,5 +1,11 @@
-import { IBoundingBox } from '@shared/interfaces/coordinate.interface';
-import type { IEntity } from './entity.interface';
+import type { ISize } from '@shared/interfaces/geometry.interface';
+import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
+import type { IEntity, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
+
+export interface ISerializedScene {
+  size: ISize;
+  entities: ISerializedEntity[];
+}
 
 export interface IScene {
   update(): void;
@@ -7,4 +13,5 @@ export interface IScene {
   removeEntity(id: string): void;
   addEntity(entity: IEntity): void;
   getSceneSlice(range: IBoundingBox): IEntity[];
+  serialize(): ISerializedScene;
 }
