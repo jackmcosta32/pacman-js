@@ -16,4 +16,4 @@ export interface ISprite extends ICoordinate {
   spriteSheetId: string;
 }
 
-export type ISpriteMap<Sequence extends string> = Record<Sequence, ISprite | ISprite[]>;
+export type ISpriteFrames = ISprite | ISprite[];

@@ -1,5 +1,5 @@
 import { SECONDS_PER_FRAME } from './config/game.config';
-import { ACTOR_SPRITES, MENU_FONT } from './config/asset.configs';
+import { ACTOR_SPRITES, MENU_FONT } from './config/asset.config';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { IGame } from '@shared/interfaces/game.interface';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
@@ -18,6 +18,7 @@ export interface IPacmanGameClientConstructor {
 
 export class PacmanGameClient implements IGameClient {
   private readonly game: IGame;
+  private currentSceneId?: string;
   private readonly inputDriver: IInputDriver;
   private readonly assetsDriver: IAssetsDriver;
   private readonly graphicsDriver: IGraphicsDriver;
@@ -31,6 +32,11 @@ export class PacmanGameClient implements IGameClient {
   }
 
   private syncGameScene(scene: ISerializedScene) {
+    if (this.currentSceneId !== scene.id) {
+      this.graphicsDriver.setResolution(scene.size);
+      this.currentSceneId = scene.id;
+    }
+
     // I will need two states, one that runs in the client
     // and another that runs in the server/isolated
     if (!scene.entities) return;

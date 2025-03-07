@@ -1,6 +1,6 @@
 // TODO: Scenes need to be loaded dynamically
-import { MainMenuScene } from './scenes/main-menu.scene';
-import { ClassicGameScene } from './scenes/classsic-game.scene';
+import { PacmanGameScene } from './scenes/pacman-game.scene';
+import { PacmanMainMenuScene } from './scenes/pacman-main-menu.scene';
 
 import { Observer } from '@shared/patterns/observer';
 import type { Callback } from '@shared/types/util.type';
@@ -17,7 +17,7 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
   private currentScene: IScene | undefined;
 
   public loadScene(id: string): void {
-    this.currentScene = ClassicGameScene;
+    this.currentScene = PacmanGameScene;
   }
 
   public init(): void {
@@ -25,7 +25,7 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
   }
 
   public start(): void {
-    this.currentScene = ClassicGameScene;
+    this.currentScene = PacmanGameScene;
   }
 
   public update(): void {

@@ -1,3 +1,4 @@
+import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
 import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
 import type { IAssetsDriver, IGraphicsDriver } from '@game-client/interfaces/driver.interface';
@@ -53,5 +54,10 @@ export class GraphicsDriver implements IGraphicsDriver {
     const canvas = this.context.canvas;
 
     this.context.clearRect(position.x, position.y, canvas.width, canvas.height);
+  }
+
+  public setResolution(resolution: ISize) {
+    this.context.canvas.width = resolution.width;
+    this.context.canvas.height = resolution.height;
   }
 }

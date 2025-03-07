@@ -1,11 +1,10 @@
 import { Component } from '@game-engine/core/component';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
-import type { ISprite, ISpriteMap } from '@shared/interfaces/graphics.interface';
+import type { ISprite, ISpriteFrames } from '@shared/interfaces/graphics.interface';
 import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 
 export interface ISpriteComponentConstructor {
-  animationSequence: string;
-  spriteMap: ISpriteMap<string>;
+  spriteFrames: ISpriteFrames;
 }
 
 export interface ISerializedSpriteComponent extends ISerializedComponent {
@@ -15,40 +14,35 @@ export interface ISerializedSpriteComponent extends ISerializedComponent {
 export class SpriteComponent extends Component {
   public static readonly type = COMPONENT_TYPE.SPRITE_COMPONENT;
 
-  private animationSequence: string;
   private animationFrame: number = 0;
-  private readonly spriteMap: ISpriteMap<string>;
+  private spriteFrames: ISpriteFrames;
 
   constructor(params: ISpriteComponentConstructor) {
     super();
 
-    this.spriteMap = params.spriteMap;
-    this.animationSequence = params.animationSequence;
+    this.spriteFrames = params.spriteFrames;
   }
 
   public resetAnimationFrame() {
     this.animationFrame = 0;
   }
 
+  public updateSpriteFrames(spriteFrames: ISpriteFrames) {
+    this.spriteFrames = spriteFrames;
+  }
+
   public updateAnimationFrame() {
     const nextAnimationFrame = this.animationFrame + 1;
-    const spriteFrames = this.spriteMap[this.animationSequence];
 
-    if (!Array.isArray(spriteFrames) || !spriteFrames.length) this.animationFrame = 0;
-    else if (nextAnimationFrame < spriteFrames.length) this.animationFrame += 1;
+    if (!Array.isArray(this.spriteFrames) || !this.spriteFrames.length) this.animationFrame = 0;
+    else if (nextAnimationFrame < this.spriteFrames.length) this.animationFrame += 1;
     else this.animationFrame = 0;
   }
 
-  public updateAnimationSequence(animationSequence: string) {
-    this.animationSequence = animationSequence;
-  }
-
   public get sprite(): ISprite {
-    const spriteFrames = this.spriteMap[this.animationSequence];
+    if (!Array.isArray(this.spriteFrames)) return this.spriteFrames;
 
-    if (!Array.isArray(spriteFrames)) return spriteFrames;
-
-    const currentSprite = spriteFrames[this.animationFrame];
+    const currentSprite = this.spriteFrames[this.animationFrame];
 
     return currentSprite;
   }

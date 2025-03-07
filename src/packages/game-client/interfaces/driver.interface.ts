@@ -1,7 +1,8 @@
 import type { IAsset } from '@shared/interfaces/asset.interface';
 import type { IEvent } from '@shared/interfaces/event.interface';
-import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
+import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
+import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
 
 export interface IAssetsDriver {
   getAsset(id: string): HTMLElement | FontFace;
@@ -18,6 +19,7 @@ export interface IInputDriver {
 
 export interface IGraphicsDriver {
   clear(position: ICoordinate): void;
+  setResolution(resolution: ISize): void;
   drawSprite(sprite: ISprite, position: ICoordinate): void;
   drawText(text: string, position: ICoordinate, options?: Partial<ITypographyOptions>): void;
 }

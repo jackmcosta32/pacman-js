@@ -45,13 +45,8 @@ export class PositionComponent extends Component {
   }
 
   public update(params: Partial<IPositionComponentConstructor>): void {
-    if (params.size) {
-      this.size = params.size;
-    }
-
-    if (params.position) {
-      this.position = params.position;
-    }
+    if (params.size) this.size = params.size;
+    if (params.position) this.position = params.position;
   }
 
   public serialize(): ISerializedPositionComponent {

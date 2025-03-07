@@ -3,11 +3,13 @@ import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
 import type { IEntity, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
 export interface ISerializedScene {
+  id: string;
   size: ISize;
   entities: ISerializedEntity[];
 }
 
 export interface IScene {
+  id: string;
   update(): void;
   destroy(): void;
   removeEntity(id: string): void;

@@ -6,16 +6,19 @@ import { PositionComponent } from '@game-engine/components/position.component';
 import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
+  id: string;
   size: ISize;
   entities?: IEntity[];
 }
 
 export class Scene implements IScene {
-  protected readonly size;
-  protected readonly quadTree;
+  public readonly id: string;
+  protected readonly size: ISize;
+  protected readonly quadTree: QuadTree;
   protected readonly entities = new Map<string, IEntity>();
 
   constructor(params: ISceneConstructor) {
+    this.id = params.id;
     this.size = params.size;
 
     this.quadTree = new QuadTree({
@@ -54,6 +57,7 @@ export class Scene implements IScene {
   }
 
   public update() {
+    // TODO: Consider moving the quad tree collision logic to an external system or to the entity manager
     this.entities.forEach((entity) => {
       const positionComponent = entity.getComponent(PositionComponent);
 
@@ -77,6 +81,7 @@ export class Scene implements IScene {
     }
 
     return {
+      id: this.id,
       size: this.size,
       entities: serializedEntities,
     };
