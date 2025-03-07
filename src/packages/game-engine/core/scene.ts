@@ -3,23 +3,29 @@ import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { IEntity } from '@game-engine/interfaces/entity.interface';
 import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
 import { PositionComponent } from '@game-engine/components/position.component';
-import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
+import type { IScene, ISerializedScene, ISystem } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
   id: string;
   size: ISize;
+  viewport: ISize;
+  systems?: ISystem[];
   entities?: IEntity[];
 }
 
 export class Scene implements IScene {
   public readonly id: string;
   protected readonly size: ISize;
+  private readonly viewport: ISize;
+  protected readonly systems: ISystem[];
   protected readonly quadTree: QuadTree;
   protected readonly entities = new Map<string, IEntity>();
 
   constructor(params: ISceneConstructor) {
     this.id = params.id;
     this.size = params.size;
+    this.viewport = params.viewport;
+    this.systems = params.systems ?? [];
 
     this.quadTree = new QuadTree({
       branchCapacity: 50,
@@ -57,14 +63,18 @@ export class Scene implements IScene {
   }
 
   public update() {
-    // TODO: Consider moving the quad tree collision logic to an external system or to the entity manager
-    this.entities.forEach((entity) => {
-      const positionComponent = entity.getComponent(PositionComponent);
-
-      if (!positionComponent) return;
-
-      this.quadTree.updateNode(entity.id, positionComponent.boundingBox);
+    this.systems.forEach((system) => {
+      this.entities.forEach((entity) => system.update(entity));
     });
+
+    // TODO: Consider moving the quad tree collision logic to an external system or to the entity manager
+    // this.entities.forEach((entity) => {
+    //   const positionComponent = entity.getComponent(PositionComponent);
+
+    //   if (!positionComponent) return;
+
+    //   this.quadTree.updateNode(entity.id, positionComponent.boundingBox);
+    // });
   }
 
   public getSceneSlice(viewport: IBoundingBox) {
@@ -83,6 +93,7 @@ export class Scene implements IScene {
     return {
       id: this.id,
       size: this.size,
+      viewport: this.viewport,
       entities: serializedEntities,
     };
   }

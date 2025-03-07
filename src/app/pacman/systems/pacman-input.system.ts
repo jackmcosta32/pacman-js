@@ -1,6 +1,11 @@
 import type { IEntity } from '@game-engine/interfaces/entity.interface';
 
+export interface IInputSystemConstructor {
+  movementSystem: 
+}
+
 export class InputSystem {
+
   private entitiesManager: unknown;
   private movementSystem: unknown;
 

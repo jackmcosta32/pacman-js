@@ -33,6 +33,8 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
       throw new Error('Scene not initialized');
     }
 
+    this.currentScene.update();
+
     this.notify(this.currentScene.serialize());
   }
 

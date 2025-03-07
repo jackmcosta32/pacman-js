@@ -6,6 +6,7 @@ import { TextEntityFactory } from '@game-engine/factories/text-entity.factory';
 export const PacmanMainMenuScene = new Scene({
   id: 'main-menu',
   size: { width: 1280, height: 720 },
+  viewport: { width: 1280, height: 720 },
   entities: [
     TextEntityFactory.make({
       color: 'white',

@@ -33,9 +33,11 @@ export class PacmanGameClient implements IGameClient {
 
   private syncGameScene(scene: ISerializedScene) {
     if (this.currentSceneId !== scene.id) {
-      this.graphicsDriver.setResolution(scene.size);
+      this.graphicsDriver.setResolution(scene.viewport);
       this.currentSceneId = scene.id;
     }
+
+    this.graphicsDriver.clear({ x: 0, y: 0 });
 
     // I will need two states, one that runs in the client
     // and another that runs in the server/isolated

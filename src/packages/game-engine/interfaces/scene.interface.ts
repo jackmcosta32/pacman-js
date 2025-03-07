@@ -2,9 +2,14 @@ import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
 import type { IEntity, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
+export interface ISystem {
+  update(entity: IEntity): void;
+}
+
 export interface ISerializedScene {
   id: string;
   size: ISize;
+  viewport: ISize;
   entities: ISerializedEntity[];
 }
 

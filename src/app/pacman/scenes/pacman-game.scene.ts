@@ -1,6 +1,7 @@
 import { Scene } from '@game-engine/core/scene';
 import { PACMAN_SPRITE_MAP } from '@pacman/sprites/pacman.sprites';
 import { RED_GHOST_SPRITE_MAP } from '@pacman/sprites/ghost.sprites';
+import { PacmanAnimationSystem } from '@pacman/systems/pacman-animation.system';
 import { PacmanBotEntityFactory } from '@pacman/factories/pacman-bot-entity.factory';
 import { PacmanPlayerEntityFactory } from '@pacman/factories/pacman-player-entity.factory';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
@@ -9,6 +10,8 @@ import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/con
 export const PacmanGameScene = new Scene({
   id: 'game-scene',
   size: { width: 1280, height: 720 },
+  viewport: { width: 1280, height: 720 },
+  systems: [new PacmanAnimationSystem()],
   entities: [
     PacmanPlayerEntityFactory.make({
       speed: 0.1,
