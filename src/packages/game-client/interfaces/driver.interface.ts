@@ -1,6 +1,6 @@
 import type { IAsset } from '@shared/interfaces/asset.interface';
-import type { IEvent } from '@shared/interfaces/event.interface';
 import type { ISize } from '@shared/interfaces/geometry.interface';
+import type { IInputEvent } from '@shared/interfaces/event.interface';
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
 import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
 
@@ -14,7 +14,7 @@ export interface IAssetsDriver {
 export interface IInputDriver {
   init(): void;
   clearInputStream(): void;
-  readInputStream(): IEvent[];
+  readInputStream(): IInputEvent | undefined;
 }
 
 export interface IGraphicsDriver {

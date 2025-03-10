@@ -39,10 +39,16 @@ export class PacmanActorComponent extends Component {
     this.movementState = params.movementState ?? PACMAN_ACTOR_MOVEMENT_STATE.IDLE;
   }
 
-  public update(params: Partial<IPacmanActorComponentConstructor>) {
-    if (params.speed) this.speed = params.speed;
-    if (params.direction) this.direction = params.direction;
-    if (params.movementState) this.movementState = params.movementState;
+  public updateSpeed(speed: number) {
+    this.speed = speed;
+  }
+
+  public updateDirection(direction: IPacmanActorDirection) {
+    this.direction = direction;
+  }
+
+  public updateMovementState(movementState: IPacmanActorMovementState) {
+    this.movementState = movementState;
   }
 
   public get spriteFrames() {

@@ -1,30 +1,23 @@
 import type { Values } from '@shared/types/util.type';
+import { CURSOR_EVENT_TYPE, KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 
 export interface IEvent {
   type: string;
 }
 
-export const KEYBOARD_EVENT_TYPES = {
-  KEY_UP: 'KeyUpEvent',
-  KEY_DOWN: 'KeyDownEvent',
-  KEY_PRESSED: 'KeyPressedEvent',
-} as const;
-
-export type IKeyboardEventType = Values<typeof KEYBOARD_EVENT_TYPES>;
+export type IKeyboardEventType = Values<typeof KEYBOARD_EVENT_TYPE>;
 
 export interface IKeyboardEvent {
   type: IKeyboardEventType;
   keyCode: string;
 }
 
-export const CURSOR_EVENT_TYPES = {
-  CLICK: 'ClickEvent',
-};
-
-export type ICursorEventType = Values<typeof CURSOR_EVENT_TYPES>;
+export type ICursorEventType = Values<typeof CURSOR_EVENT_TYPE>;
 
 export interface ICursorEvent {
   type: ICursorEventType;
 }
+
+export type IInputEventType = IKeyboardEventType | ICursorEventType;
 
 export type IInputEvent = IKeyboardEvent | ICursorEvent;
