@@ -1,10 +1,12 @@
+import type { IRingBuffer } from '@shared/interfaces/data-structures.interface';
+
 const DEFAULT_SIZE = 32;
 
 export interface IRingBufferConstructor {
   size?: number;
 }
 
-export class RingBuffer<Element> {
+export class RingBuffer<Element> implements IRingBuffer<Element> {
   protected size: number;
   protected head: number = 0;
   protected tail: number = 0;
