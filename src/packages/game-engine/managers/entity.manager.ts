@@ -1,10 +1,26 @@
-import type { IEntity, IEntityManager } from '@game-engine/interfaces/entity.interface';
+import type { IEntity, IEntityManager, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
-export class EntityManger implements IEntityManager {
+interface IEntityManagerConstructor {
+  entities?: IEntity[];
+}
+
+export class EntityManager implements IEntityManager {
   protected readonly entities = new Map<string, IEntity>();
+
+  constructor(params?: IEntityManagerConstructor) {
+    params?.entities?.forEach((entity) => this.addEntity(entity));
+  }
 
   public hasEntity(id: string) {
     return this.entities.has(id);
+  }
+
+  public getEntity(id: string): IEntity | undefined {
+    return this.entities.get(id);
+  }
+
+  public getEntities() {
+    return Array.from(this.entities.values());
   }
 
   public addEntity(entity: IEntity) {
@@ -23,11 +39,21 @@ export class EntityManger implements IEntityManager {
     return true;
   }
 
-  public getEntities() {
-    return this.entities.values();
+  public forEachEntity(callback: (entity: IEntity) => void) {
+    return this.entities.forEach(callback);
   }
 
   public clear() {
     this.entities.clear();
+  }
+
+  public serialize(): ISerializedEntity[] {
+    const serializedEntities = [];
+
+    for (const entity of this.entities.values()) {
+      serializedEntities.push(entity.serialize());
+    }
+
+    return serializedEntities;
   }
 }

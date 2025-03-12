@@ -29,8 +29,11 @@ export interface IEntity {
 
 export interface IEntityManager {
   clear(): void;
+  getEntities(): Array<IEntity>;
   hasEntity(id: string): boolean;
+  serialize(): ISerializedEntity[];
   removeEntity(id: string): boolean;
   addEntity(entity: IEntity): boolean;
-  getEntities(): MapIterator<IEntity>;
+  getEntity(id: string): IEntity | undefined;
+  forEachEntity(callback: (entity: IEntity) => void): void;
 }
