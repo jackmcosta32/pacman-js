@@ -1,12 +1,16 @@
-import { SECONDS_PER_FRAME } from './config/game.config';
-import { ACTOR_SPRITES, MENU_FONT } from './config/asset.config';
-import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { IGame } from '@shared/interfaces/game.interface';
+import { PACMAN_EVENT_TYPE } from './constants/pacman-event.constant';
+import { COMPONENT_TYPE } from '@shared/constants/component.constant';
+import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
+import { ACTOR_SPRITES, MENU_FONT } from '@pacman/config/pacman-asset.config';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
 import type { ISerializedUIComponent } from '@game-engine/components/ui.component';
+import { SECONDS_PER_FRAME, INPUT_SCHEME } from '@pacman/config/pacman-game.config';
 import type { ISerializedSpriteComponent } from '@game-engine/components/sprite.component';
 import type { ISerializedPositionComponent } from '@game-engine/components/position.component';
+import type { IPacmanEvent, IPacmanMoveEvent } from '@pacman/interfaces/pacman-event.interface';
+import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from './constants/pacman-actor.constant';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
 
 export interface IPacmanGameClientConstructor {
@@ -64,6 +68,70 @@ export class PacmanGameClient implements IGameClient {
     });
   }
 
+  private readInputEvents(): IPacmanEvent | undefined {
+    const input = this.inputDriver.readInputStream();
+
+    if (!input) return;
+
+    if (input.type === KEYBOARD_EVENT_TYPE.KEY_DOWN || input.type === KEYBOARD_EVENT_TYPE.KEY_PRESSED) {
+      switch (input.keyCode) {
+        case INPUT_SCHEME.UP:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.UP,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.DOWN:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.DOWN,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.LEFT:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.LEFT,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.RIGHT:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.RIGHT,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+          } as IPacmanMoveEvent;
+      }
+    }
+
+    if (input.type === KEYBOARD_EVENT_TYPE.KEY_UP) {
+      switch (input.keyCode) {
+        case INPUT_SCHEME.UP:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.UP,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.DOWN:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.DOWN,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.LEFT:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.LEFT,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
+          } as IPacmanMoveEvent;
+        case INPUT_SCHEME.RIGHT:
+          return {
+            type: PACMAN_EVENT_TYPE.MOVE,
+            direction: PACMAN_ACTOR_DIRECTION.RIGHT,
+            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
+          } as IPacmanMoveEvent;
+      }
+    }
+  }
+
   private update(timestamp?: number) {
     requestAnimationFrame((timestamp) => this.update(timestamp));
 
@@ -75,12 +143,9 @@ export class PacmanGameClient implements IGameClient {
       this.lastTimestamp = timestamp - (elapsed % SECONDS_PER_FRAME);
     }
 
-    const inputs = this.inputDriver.readInputStream();
+    const inputEvent = this.readInputEvents();
 
-    this.game.readInputs(inputs);
-
-    this.inputDriver.clearInputStream();
-
+    this.game.readClientEvent(inputEvent);
     this.game.update();
   }
 

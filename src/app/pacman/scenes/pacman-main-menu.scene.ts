@@ -1,5 +1,5 @@
 import { Scene } from '@game-engine/core/scene';
-import { MENU_FONT } from '@pacman/config/asset.config';
+import { MENU_FONT } from '@pacman/config/pacman-asset.config';
 import { TextEntityFactory } from '@game-engine/factories/text-entity.factory';
 
 // TODO: How can I load a scene dynamically?

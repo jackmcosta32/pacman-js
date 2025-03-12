@@ -9,6 +9,8 @@ import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.consta
 import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 
+// TODO: Split this component into smaller components
+
 export interface IPacmanActorComponentConstructor {
   speed: number;
   direction?: IPacmanActorDirection;

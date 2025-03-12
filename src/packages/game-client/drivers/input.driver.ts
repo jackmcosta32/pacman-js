@@ -2,8 +2,11 @@ import { RingBuffer } from '@shared/data-structures/ring-buffer';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 import type { IInputDriver } from '@game-client/interfaces/driver.interface';
+import type { IRingBuffer } from '@shared/interfaces/data-structures.interface';
 
 const INPUT_THROTTLE = 500;
+
+// TODO: Move the eventBus to outside of the input driver
 
 export interface IInputDriverConstructor {
   keyThrottle?: number;
@@ -12,7 +15,7 @@ export interface IInputDriverConstructor {
 export class InputDriver implements IInputDriver {
   protected pointer: number = 0;
   protected keyThrottle: number;
-  protected eventBus: RingBuffer<IInputEvent>;
+  protected eventBus: IRingBuffer<IInputEvent>;
 
   constructor(params?: IInputDriverConstructor) {
     this.eventBus = new RingBuffer();
