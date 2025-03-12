@@ -1,9 +1,8 @@
-import { QuadTree } from '@shared/data-structures/quad-tree';
 import type { ISize } from '@shared/interfaces/geometry.interface';
-import type { IEntity } from '@game-engine/interfaces/entity.interface';
-import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
-import { PositionComponent } from '@game-engine/components/position.component';
-import type { IScene, ISerializedScene, ISystem } from '@game-engine/interfaces/scene.interface';
+import type { IGameState } from '@shared/interfaces/game.interface';
+import type { ISystem } from '@game-engine/interfaces/system.interface';
+import type { IEntity, IEntityManager } from '@game-engine/interfaces/entity.interface';
+import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
   id: string;
@@ -11,6 +10,7 @@ export interface ISceneConstructor {
   viewport: ISize;
   systems?: ISystem[];
   entities?: IEntity[];
+  entityManager: IEntityManager;
 }
 
 export class Scene implements IScene {
@@ -18,83 +18,47 @@ export class Scene implements IScene {
   protected readonly size: ISize;
   private readonly viewport: ISize;
   protected readonly systems: ISystem[];
-  protected readonly quadTree: QuadTree;
-  protected readonly entities = new Map<string, IEntity>();
+  private readonly entityManager: IEntityManager;
+  protected lastUpdateTimestamp: number | undefined;
 
   constructor(params: ISceneConstructor) {
     this.id = params.id;
     this.size = params.size;
     this.viewport = params.viewport;
+    this.entityManager = params.entityManager;
     this.systems = params.systems ?? [];
-
-    this.quadTree = new QuadTree({
-      branchCapacity: 50,
-      boundingBox: {
-        x: 0,
-        y: 0,
-        width: params.size.width,
-        height: params.size.height,
-      },
-    });
-
-    params.entities?.forEach((entity) => this.addEntity(entity));
   }
 
-  public addEntity(entity: IEntity) {
-    if (this.entities.has(entity.id)) return false;
+  public update(gameState: IGameState): void {
+    const currentTimeStamp = performance.now();
 
-    const positionComponent = entity.getComponent(PositionComponent);
+    let elapsed = 0;
 
-    if (!positionComponent) return false;
+    if (this.lastUpdateTimestamp) {
+      elapsed = currentTimeStamp - this.lastUpdateTimestamp;
+    }
 
-    this.entities.set(entity.id, entity);
-    this.quadTree.insertNode(entity.id, positionComponent.boundingBox);
+    this.systems.forEach((system) =>
+      system.update({
+        elapsed,
+        events: gameState.events,
+        entityManager: this.entityManager,
+      }),
+    );
 
-    return true;
-  }
-
-  public removeEntity(id: string) {
-    this.entities.delete(id);
-    this.quadTree.deleteNode(id);
+    this.lastUpdateTimestamp = currentTimeStamp;
   }
 
   public destroy() {
-    this.entities.clear();
-  }
-
-  public update() {
-    this.systems.forEach((system) => {
-      this.entities.forEach((entity) => system.update(entity));
-    });
-
-    // TODO: Consider moving the quad tree collision logic to an external system or to the entity manager
-    // this.entities.forEach((entity) => {
-    //   const positionComponent = entity.getComponent(PositionComponent);
-
-    //   if (!positionComponent) return;
-
-    //   this.quadTree.updateNode(entity.id, positionComponent.boundingBox);
-    // });
-  }
-
-  public getSceneSlice(viewport: IBoundingBox) {
-    const sceneEntitiesIds = this.quadTree.query(viewport);
-
-    return sceneEntitiesIds.map((id) => this.entities.get(id)!);
+    this.entityManager.clear();
   }
 
   public serialize(): ISerializedScene {
-    const serializedEntities = [];
-
-    for (const entity of this.entities.values()) {
-      serializedEntities.push(entity.serialize());
-    }
-
     return {
       id: this.id,
       size: this.size,
       viewport: this.viewport,
-      entities: serializedEntities,
+      entities: this.entityManager.serialize(),
     };
   }
 }

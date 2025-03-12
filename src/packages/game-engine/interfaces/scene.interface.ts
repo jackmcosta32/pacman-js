@@ -1,10 +1,7 @@
+import type { IEvent } from '@shared/interfaces/event.interface';
 import type { ISize } from '@shared/interfaces/geometry.interface';
-import type { IBoundingBox } from '@shared/interfaces/coordinate.interface';
-import type { IEntity, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
-
-export interface ISystem {
-  update(entity: IEntity): void;
-}
+import type { IGameState } from '@shared/interfaces/game.interface';
+import type { IEntityManager, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
 export interface ISerializedScene {
   id: string;
@@ -13,12 +10,15 @@ export interface ISerializedScene {
   entities: ISerializedEntity[];
 }
 
+export interface ISceneState {
+  elapsed: number;
+  events: IEvent[];
+  entityManager: IEntityManager;
+}
+
 export interface IScene {
   id: string;
-  update(): void;
   destroy(): void;
-  removeEntity(id: string): void;
-  addEntity(entity: IEntity): void;
-  getSceneSlice(range: IBoundingBox): IEntity[];
   serialize(): ISerializedScene;
+  update(gameState: IGameState): void;
 }
