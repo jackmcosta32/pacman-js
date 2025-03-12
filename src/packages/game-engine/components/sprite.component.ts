@@ -4,6 +4,8 @@ import type { ISprite, ISpriteFrames } from '@shared/interfaces/graphics.interfa
 import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
 
 export interface ISpriteComponentConstructor {
+  animationSpeed?: number;
+  animationDuration?: number;
   spriteFrames: ISpriteFrames;
 }
 
@@ -14,13 +16,18 @@ export interface ISerializedSpriteComponent extends ISerializedComponent {
 export class SpriteComponent extends Component {
   public static readonly type = COMPONENT_TYPE.SPRITE_COMPONENT;
 
-  private animationFrame: number = 0;
+  private animationSpeed: number;
   private spriteFrames: ISpriteFrames;
+  private readonly animationDuration: number;
+  private animationFrame: number = 0;
+  private lastAnimationUpdateTimestamp: number = 0;
 
   constructor(params: ISpriteComponentConstructor) {
     super();
 
     this.spriteFrames = params.spriteFrames;
+    this.animationSpeed = params.animationSpeed ?? 1;
+    this.animationDuration = params.animationDuration ?? 0;
   }
 
   public resetAnimationFrame() {
@@ -31,12 +38,26 @@ export class SpriteComponent extends Component {
     this.spriteFrames = spriteFrames;
   }
 
-  public updateAnimationFrame() {
+  public updateAnimationFrame(elapsed: number) {
+    if (!Array.isArray(this.spriteFrames) || this.spriteFrames.length <= 1) {
+      this.animationFrame = 0;
+      return;
+    }
+
+    const frameDuration = this.animationDuration / (this.spriteFrames.length * this.animationSpeed);
+    const elapsedAnimationTime = this.lastAnimationUpdateTimestamp + elapsed;
+
+    if (frameDuration > elapsedAnimationTime) {
+      this.lastAnimationUpdateTimestamp = elapsedAnimationTime;
+      return;
+    }
+
     const nextAnimationFrame = this.animationFrame + 1;
 
-    if (!Array.isArray(this.spriteFrames) || !this.spriteFrames.length) this.animationFrame = 0;
-    else if (nextAnimationFrame < this.spriteFrames.length) this.animationFrame += 1;
+    if (nextAnimationFrame < this.spriteFrames.length - 1) this.animationFrame = nextAnimationFrame;
     else this.animationFrame = 0;
+
+    this.lastAnimationUpdateTimestamp -= frameDuration;
   }
 
   public get sprite(): ISprite {
