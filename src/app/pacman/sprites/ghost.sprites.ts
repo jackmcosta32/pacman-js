@@ -1,5 +1,5 @@
-import { SPRITE_SIZE } from '@pacman/config/game.config';
-import { ACTOR_SPRITES } from '@pacman/config/asset.config';
+import { SPRITE_SIZE } from '@pacman/config/pacman-game.config';
+import { ACTOR_SPRITES } from '@pacman/config/pacman-asset.config';
 import type { IPacmanActorSpriteMap } from '@pacman/interfaces/pacman-actor.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 
