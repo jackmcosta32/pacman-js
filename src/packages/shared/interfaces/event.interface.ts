@@ -3,6 +3,7 @@ import { CURSOR_EVENT_TYPE, KEYBOARD_EVENT_TYPE } from '@shared/constants/event.
 
 export interface IEvent {
   type: string;
+  [key: string]: unknown;
 }
 
 export type IKeyboardEventType = Values<typeof KEYBOARD_EVENT_TYPE>;
