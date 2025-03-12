@@ -1,10 +1,9 @@
 import type {
-  IEntity,
   IComponent,
-  ISerializedEntity,
   IComponentConstructor,
   ISerializedComponent,
-} from '@game-engine/interfaces/entity.interface';
+} from '@game-engine/interfaces/component.interface';
+import type { IEntity, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
 
 export interface IEntityConstructor {
   id: string;

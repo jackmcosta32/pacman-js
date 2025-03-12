@@ -1,6 +1,6 @@
 import uniqueId from 'lodash/uniqueId';
 import { Entity } from '@game-engine/core/entity';
-import type { IComponent } from '@game-engine/interfaces/entity.interface';
+import type { IComponent } from '@game-engine/interfaces/component.interface';
 
 export class EntityFactory {
   private static components: IComponent[] = [];

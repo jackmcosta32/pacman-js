@@ -1,4 +1,8 @@
-import type { IComponent, IComponentConstructor, ISerializedComponent } from '@game-engine/interfaces/entity.interface';
+import type {
+  IComponent,
+  ISerializedComponent,
+  IComponentConstructor,
+} from '@game-engine/interfaces/component.interface';
 
 export abstract class Component implements IComponent {
   public static readonly type: string;
