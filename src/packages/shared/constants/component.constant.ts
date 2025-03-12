@@ -3,5 +3,6 @@ export const COMPONENT_TYPE = {
   SPRITE_COMPONENT: 'sprite',
   RENDER_COMPONENT: 'render',
   CAMERA_COMPONENT: 'camera',
+  CONTROL_COMPONENT: 'control',
   POSITION_COMPONENT: 'position',
 } as const;
