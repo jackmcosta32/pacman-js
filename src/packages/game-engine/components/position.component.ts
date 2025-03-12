@@ -45,7 +45,8 @@ export class PositionComponent extends Component {
   }
 
   public updatePosition(position: ICoordinate): void {
-    this.position = position;
+    this.position.x = Math.floor(position.x);
+    this.position.y = Math.floor(position.y);
   }
 
   public serialize(): ISerializedPositionComponent {
