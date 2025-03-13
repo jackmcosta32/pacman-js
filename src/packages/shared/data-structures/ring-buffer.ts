@@ -1,44 +1,58 @@
-import type { IRingBuffer } from '@shared/interfaces/data-structures.interface';
-
-const DEFAULT_SIZE = 32;
+import type { IRingBuffer } from '@shared/interfaces/ring-buffer.interface';
 
 export interface IRingBufferConstructor {
-  size?: number;
+  maxLength: number;
 }
 
 export class RingBuffer<Element> implements IRingBuffer<Element> {
-  protected size: number;
+  protected _maxLength: number;
   protected head: number = 0;
   protected tail: number = 0;
-  protected isFull: boolean = false;
-  protected elements: Array<Element> = [];
+  protected elements: Element[];
+  protected _isFull: boolean = false;
 
-  constructor(params?: IRingBufferConstructor) {
-    this.size = params?.size ?? DEFAULT_SIZE;
+  constructor(params: IRingBufferConstructor) {
+    this._maxLength = params.maxLength;
+    this.elements = new Array<Element>(params.maxLength);
+  }
+
+  public get isFull(): boolean {
+    return this._isFull;
+  }
+
+  public get maxLength(): number {
+    return this._maxLength;
   }
 
   public get isEmpty(): boolean {
-    return !this.isFull && this.head === this.tail;
+    return !this._isFull && this.head === this.tail;
+  }
+
+  public get length(): number {
+    if (this.isFull) return this._maxLength;
+
+    return (this.tail - this.head + this._maxLength) % this._maxLength;
   }
 
   public push(element: Element): void {
     this.elements[this.tail] = element;
 
-    if (this.isFull) {
-      this.head = (this.head + 1) % this.size;
+    if (this._isFull) {
+      this.head = (this.head + 1) % this._maxLength;
     }
 
-    this.tail = (this.tail + 1) % this.size;
-    this.isFull = this.tail === this.head;
+    this.tail = (this.tail + 1) % this._maxLength;
+    this._isFull = this.tail === this.head;
   }
 
   public pop(): Element | undefined {
     if (this.isEmpty) return;
 
     const element = this.elements[this.head];
+    this.elements[this.head] = undefined!;
 
-    this.head = (this.head + 1) % this.size;
-    this.isFull = false;
+    this.head = (this.head + 1) % this._maxLength;
+    this._isFull = false;
 
     return element;
   }
@@ -47,15 +61,20 @@ export class RingBuffer<Element> implements IRingBuffer<Element> {
     return this.isEmpty ? undefined : this.elements[this.head];
   }
 
-  public get length(): number {
-    if (this.isFull) return this.size;
+  public drain(): Element[] {
+    const drainedElements: Element[] = [];
 
-    return (this.tail - this.head + this.size) % this.size;
+    while (!this.isEmpty) {
+      drainedElements.push(this.pop()!);
+    }
+
+    return drainedElements;
   }
 
   public clear(): void {
     this.head = 0;
     this.tail = 0;
-    this.isFull = false;
+    this._isFull = false;
+    this.elements.fill(undefined!);
   }
 }
