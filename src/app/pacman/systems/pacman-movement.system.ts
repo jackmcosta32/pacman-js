@@ -7,12 +7,19 @@ import { PACMAN_EVENT_TYPE } from '@pacman/constants/pacman-event.constant';
 import { ControlComponent } from '@game-engine/components/control.component';
 import { PositionComponent } from '@game-engine/components/position.component';
 import { PacmanActorComponent } from '@pacman/components/pacman-actor.component';
+import type { IPacmanMovementEvent } from '@pacman/interfaces/pacman-event.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
+import type { IPacmanActorDirection, IPacmanActorMovementState } from '@pacman/interfaces/pacman-actor.interface';
 
-export class PacmanActorMovementSystem extends System {
+export class PacmanMovementSystem extends System {
   public static readonly id = PACMAN_SYSTEM.MOVEMENT;
 
-  public updateEntityMovementState(entity: IEntity) {
+  public updateEntityMovementState(
+    entity: IEntity,
+    movementState: IPacmanActorMovementState,
+    direction: IPacmanActorDirection,
+    elapsed: number,
+  ) {
     const controlComponent = entity.getComponent(ControlComponent);
 
     if (!controlComponent) return;
@@ -22,12 +29,15 @@ export class PacmanActorMovementSystem extends System {
 
     if (!positionComponent || !actorComponent) return;
 
-    if (actorComponent.movementState === PACMAN_ACTOR_MOVEMENT_STATE.IDLE) return;
+    actorComponent.updateDirection(direction);
+    actorComponent.updateMovementState(movementState);
+
+    if (movementState === PACMAN_ACTOR_MOVEMENT_STATE.IDLE) return;
 
     const currentPosition = positionComponent.position;
 
     let nextPosition: ICoordinate;
-    const distance = 0.1;
+    const distance = actorComponent.speed * elapsed;
 
     switch (actorComponent.direction) {
       case PACMAN_ACTOR_DIRECTION.UP:
@@ -44,14 +54,16 @@ export class PacmanActorMovementSystem extends System {
         break;
     }
 
-    // TODO: Check collisions
-    actorComponent.updateMovementState(PACMAN_ACTOR_MOVEMENT_STATE.WALKING);
     positionComponent.updatePosition(nextPosition);
   }
 
   public update(sceneState: ISceneState) {
-    sceneState.events.forEach((event) => {
-      if (event.type !== PACMAN_EVENT_TYPE.MOVE) return;
+    const moveEvents = sceneState.eventMap[PACMAN_EVENT_TYPE.MOVEMENT] as IPacmanMovementEvent[];
+
+    moveEvents?.forEach((event) => {
+      sceneState.entityManager.getEntities().forEach((entity) => {
+        this.updateEntityMovementState(entity, event.movementState, event.direction, sceneState.elapsed);
+      });
     });
   }
 }

@@ -1,3 +1,3 @@
 export const PACMAN_EVENT_TYPE = {
-  MOVE: 'MoveEvent',
+  MOVEMENT: 'MovementEvent',
 } as const;

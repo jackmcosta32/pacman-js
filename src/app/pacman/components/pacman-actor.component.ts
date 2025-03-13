@@ -6,7 +6,7 @@ import type {
 
 import { Component } from '@game-engine/core/component';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
-import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
+import type { ISerializedComponent } from '@game-engine/interfaces/component.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 
 // TODO: Split this component into smaller components

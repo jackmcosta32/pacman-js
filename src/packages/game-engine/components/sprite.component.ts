@@ -1,7 +1,7 @@
 import { Component } from '@game-engine/core/component';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ISprite, ISpriteFrames } from '@shared/interfaces/graphics.interface';
-import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
+import type { ISerializedComponent } from '@game-engine/interfaces/component.interface';
 
 export interface ISpriteComponentConstructor {
   animationSpeed?: number;

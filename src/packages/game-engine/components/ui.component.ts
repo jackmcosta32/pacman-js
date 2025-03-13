@@ -1,7 +1,7 @@
 import { Component } from '@game-engine/core/component';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import type { ITypographyOptions } from '@shared/interfaces/graphics.interface';
-import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
+import type { ISerializedComponent } from '@game-engine/interfaces/component.interface';
 
 export interface IUIComponentConstructor extends Partial<ITypographyOptions> {
   innerText?: string;

@@ -41,7 +41,8 @@ export class Scene implements IScene {
     this.systems.forEach((system) =>
       system.update({
         elapsed,
-        events: gameState.events,
+        eventMap: gameState.eventMap,
+        eventQueue: gameState.eventQueue,
         entityManager: this.entityManager,
       }),
     );

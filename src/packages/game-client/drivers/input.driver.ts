@@ -1,12 +1,13 @@
 import { RingBuffer } from '@shared/data-structures/ring-buffer';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
+import type { IRingBuffer } from '@shared/interfaces/ring-buffer.interface';
 import type { IInputDriver } from '@game-client/interfaces/driver.interface';
-import type { IRingBuffer } from '@shared/interfaces/data-structures.interface';
 
 const INPUT_THROTTLE = 500;
+const EVENT_BUFFER_MAX_LENGTH = 50;
 
-// TODO: Move the eventBus to outside of the input driver
+// TODO: Move the eventBuffer to outside of the input driver
 
 export interface IInputDriverConstructor {
   keyThrottle?: number;
@@ -15,11 +16,11 @@ export interface IInputDriverConstructor {
 export class InputDriver implements IInputDriver {
   protected pointer: number = 0;
   protected keyThrottle: number;
-  protected eventBus: IRingBuffer<IInputEvent>;
+  protected eventBuffer: IRingBuffer<IInputEvent>;
 
   constructor(params?: IInputDriverConstructor) {
-    this.eventBus = new RingBuffer();
     this.keyThrottle = params?.keyThrottle ?? INPUT_THROTTLE;
+    this.eventBuffer = new RingBuffer({ maxLength: EVENT_BUFFER_MAX_LENGTH });
   }
 
   public init() {
@@ -30,11 +31,11 @@ export class InputDriver implements IInputDriver {
   }
 
   public readInputStream(): IInputEvent | undefined {
-    return this.eventBus.pop();
+    return this.eventBuffer.pop();
   }
 
   public clearInputStream(): void {
-    this.eventBus.clear();
+    this.eventBuffer.clear();
   }
 
   private handleOnKeyDown(event: KeyboardEvent) {
@@ -42,7 +43,7 @@ export class InputDriver implements IInputDriver {
     const repeat = event.repeat;
     const type = repeat ? KEYBOARD_EVENT_TYPE.KEY_PRESSED : KEYBOARD_EVENT_TYPE.KEY_DOWN;
 
-    this.eventBus.push({
+    this.eventBuffer.push({
       type,
       keyCode,
     });
@@ -52,7 +53,7 @@ export class InputDriver implements IInputDriver {
     const keyCode = event.code;
     const type = KEYBOARD_EVENT_TYPE.KEY_UP;
 
-    this.eventBus.push({
+    this.eventBuffer.push({
       type,
       keyCode,
     });

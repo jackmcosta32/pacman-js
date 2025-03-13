@@ -1,4 +1,5 @@
 import type { IEvent } from '@shared/interfaces/event.interface';
+import type { IQueue } from '@shared/interfaces/queue.interface';
 import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { IGameState } from '@shared/interfaces/game.interface';
 import type { IEntityManager, ISerializedEntity } from '@game-engine/interfaces/entity.interface';
@@ -12,8 +13,9 @@ export interface ISerializedScene {
 
 export interface ISceneState {
   elapsed: number;
-  events: IEvent[];
+  eventQueue: IQueue<IEvent>;
   entityManager: IEntityManager;
+  eventMap: Record<string, IEvent[]>;
 }
 
 export interface IScene {

@@ -1,6 +1,6 @@
 import { Component } from '@game-engine/core/component';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
-import type { ISerializedComponent } from '@game-engine/interfaces/entity.interface';
+import type { ISerializedComponent } from '@game-engine/interfaces/component.interface';
 import type { IBoundingBox, ICoordinate } from '@shared/interfaces/coordinate.interface';
 
 export interface ICameraComponentConstructor {

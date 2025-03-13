@@ -5,10 +5,10 @@ import type { IPacmanActorDirection, IPacmanActorMovementState } from './pacman-
 
 export type IPacmanEventType = Values<typeof PACMAN_EVENT_TYPE>;
 
-export interface IPacmanMoveEvent extends IEvent {
-  type: typeof PACMAN_EVENT_TYPE.MOVE;
+export interface IPacmanMovementEvent extends IEvent {
+  type: typeof PACMAN_EVENT_TYPE.MOVEMENT;
   direction: IPacmanActorDirection;
   movementState: IPacmanActorMovementState;
 }
 
-export type IPacmanEvent = IPacmanMoveEvent;
+export type IPacmanEvent = IPacmanMovementEvent;

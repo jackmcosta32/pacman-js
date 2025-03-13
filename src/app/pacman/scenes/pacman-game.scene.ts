@@ -3,7 +3,7 @@ import { PACMAN_SPRITE_MAP } from '@pacman/sprites/pacman.sprites';
 import { EntityManager } from '@game-engine/managers/entity.manager';
 import { RED_GHOST_SPRITE_MAP } from '@pacman/sprites/ghost.sprites';
 import { PACMAN_SCENE } from '@pacman/constants/pacman-scene.constant';
-import { PacmanInputSystem } from '@pacman/systems/pacman-input.system';
+import { PacmanMovementSystem } from '@pacman/systems/pacman-movement.system';
 import { PacmanAnimationSystem } from '@pacman/systems/pacman-animation.system';
 import { PacmanBotEntityFactory } from '@pacman/factories/pacman-bot-entity.factory';
 import { PacmanPlayerEntityFactory } from '@pacman/factories/pacman-player-entity.factory';
@@ -36,7 +36,7 @@ const entityManager = new EntityManager({
   ],
 });
 
-const systems = [new PacmanAnimationSystem(), new PacmanInputSystem()];
+const systems = [new PacmanAnimationSystem(), new PacmanMovementSystem()];
 
 // TODO: How can I load a scene dynamically?
 export const PacmanGameScene = new Scene({
