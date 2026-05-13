@@ -7,8 +7,6 @@ import type { IInputDriver } from '@game-client/interfaces/driver.interface';
 const INPUT_THROTTLE = 500;
 const EVENT_BUFFER_MAX_LENGTH = 50;
 
-// TODO: Move the eventBuffer to outside of the input driver
-
 export interface IInputDriverConstructor {
   keyThrottle?: number;
 }

@@ -1,3 +1,9 @@
+export const SCENE_EVENT_TYPE = {
+  INIT: 'SceneInitEvent',
+  UPDATE: 'SceneUpdateEvent',
+  DESTROY: 'SceneDestroyEvent',
+} as const;
+
 export const KEYBOARD_EVENT_TYPE = {
   KEY_UP: 'KeyUpEvent',
   KEY_DOWN: 'KeyDownEvent',

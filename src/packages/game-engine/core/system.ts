@@ -1,15 +1,24 @@
-import type { ISceneState } from '@game-engine/interfaces/scene.interface';
 import type { ISystemConstructor, ISerializedSystem, ISystem } from '@game-engine/interfaces/system.interface';
 
 export abstract class System implements ISystem {
   public static readonly id: string;
-  protected enabled = true;
+  protected _enabled = true;
 
   public get id() {
     return (this.constructor as ISystemConstructor<ISystem>).id;
   }
 
-  public abstract update(sceneState: ISceneState): void;
+  public get enabled() {
+    return this._enabled;
+  }
+
+  public disable() {
+    this._enabled = false;
+  }
+
+  public enable() {
+    this._enabled = true;
+  }
 
   public serialize(): ISerializedSystem {
     return {

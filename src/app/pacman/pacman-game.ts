@@ -33,12 +33,14 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
     this.currentScene = PacmanGameScene;
   }
 
-  public init(): void {
-    throw new Error('Method not implemented.');
-  }
-
   public start(): void {
     this.currentScene = PacmanGameScene;
+
+    if (!this.currentScene) {
+      throw new Error('Scene not initialized');
+    }
+
+    this.currentScene.init();
   }
 
   public update(): void {

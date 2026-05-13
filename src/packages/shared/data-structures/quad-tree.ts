@@ -158,6 +158,16 @@ export class QuadTree {
     return this.parent.updateNode(id, boundingBox);
   }
 
+  public getNode(id: string): IBoundingBox | undefined {
+    const element = this.references.get(id);
+
+    if (!element) return undefined;
+
+    const [boundingBox] = element;
+
+    return boundingBox;
+  }
+
   public query(range: IBoundingBox, found: string[] = []): string[] {
     if (!this.divided && !this.nodeIds.size) return found;
 

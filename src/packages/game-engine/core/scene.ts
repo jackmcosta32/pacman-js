@@ -1,7 +1,9 @@
+import type { IEvent } from '@shared/interfaces/event.interface';
+import type { IQueue } from '@shared/interfaces/queue.interface';
 import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { IGameState } from '@shared/interfaces/game.interface';
 import type { ISystem } from '@game-engine/interfaces/system.interface';
-import type { IEntity, IEntityManager } from '@game-engine/interfaces/entity.interface';
+import type { IEntityManager } from '@game-engine/interfaces/entity.interface';
 import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
@@ -9,7 +11,7 @@ export interface ISceneConstructor {
   size: ISize;
   viewport: ISize;
   systems?: ISystem[];
-  entities?: IEntity[];
+  eventQueue: IQueue<IEvent>;
   entityManager: IEntityManager;
 }
 
@@ -18,6 +20,7 @@ export class Scene implements IScene {
   protected readonly size: ISize;
   private readonly viewport: ISize;
   protected readonly systems: ISystem[];
+  protected readonly eventQueue: IQueue<IEvent>;
   private readonly entityManager: IEntityManager;
   protected lastUpdateTimestamp: number | undefined;
 
@@ -25,8 +28,21 @@ export class Scene implements IScene {
     this.id = params.id;
     this.size = params.size;
     this.viewport = params.viewport;
+    this.eventQueue = params.eventQueue;
     this.entityManager = params.entityManager;
     this.systems = params.systems ?? [];
+  }
+
+  public init(): void {
+    this.systems.forEach((system) => {
+      if (!system.init) return;
+
+      system.init({
+        elapsed: 0,
+        eventQueue: this.eventQueue,
+        entityManager: this.entityManager,
+      });
+    });
   }
 
   public update(gameState: IGameState): void {
@@ -51,6 +67,13 @@ export class Scene implements IScene {
   }
 
   public destroy() {
+    this.systems.forEach((system) => {
+      system.destroy({
+        elapsed: 0,
+        entityManager: this.entityManager,
+      });
+    });
+
     this.entityManager.clear();
   }
 

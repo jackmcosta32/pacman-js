@@ -58,6 +58,8 @@ export class PacmanMovementSystem extends System {
   }
 
   public update(sceneState: ISceneState) {
+    if (!sceneState.eventMap) return;
+
     const moveEvents = sceneState.eventMap[PACMAN_EVENT_TYPE.MOVEMENT] as IPacmanMovementEvent[];
 
     moveEvents?.forEach((event) => {

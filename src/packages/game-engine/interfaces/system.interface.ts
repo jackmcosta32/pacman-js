@@ -14,8 +14,11 @@ export interface ISerializedSystem {
 
 export interface ISystem {
   id: string;
+  enabled: boolean;
   serialize(): ISerializedSystem;
-  update(sceneState: ISceneState): void;
+  init?: (sceneState: ISceneState) => void;
+  update?: (sceneState: ISceneState) => void;
+  destroy?: (sceneState: ISceneState) => void;
 }
 
 export interface ISerializedSystem {
