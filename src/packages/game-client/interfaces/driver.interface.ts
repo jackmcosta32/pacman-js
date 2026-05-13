@@ -13,7 +13,9 @@ export interface IAssetsDriver {
 
 export interface IInputDriver {
   init(): void;
+  destroy(): void;
   clearInputStream(): void;
+  drainInputStream(): IInputEvent[];
   readInputStream(): IInputEvent | undefined;
 }
 

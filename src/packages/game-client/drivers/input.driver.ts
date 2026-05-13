@@ -15,6 +15,7 @@ export class InputDriver implements IInputDriver {
   protected pointer: number = 0;
   protected keyThrottle: number;
   protected eventBuffer: IRingBuffer<IInputEvent>;
+  private controller?: AbortController;
 
   constructor(params?: IInputDriverConstructor) {
     this.keyThrottle = params?.keyThrottle ?? INPUT_THROTTLE;
@@ -22,14 +23,26 @@ export class InputDriver implements IInputDriver {
   }
 
   public init() {
-    const controller = new AbortController();
+    this.destroy();
 
-    addEventListener('keyup', (event) => this.handleOnKeyUp(event), { signal: controller.signal });
-    addEventListener('keydown', (event) => this.handleOnKeyDown(event), { signal: controller.signal });
+    this.controller = new AbortController();
+
+    addEventListener('keyup', (event) => this.handleOnKeyUp(event), { signal: this.controller.signal });
+    addEventListener('keydown', (event) => this.handleOnKeyDown(event), { signal: this.controller.signal });
+  }
+
+  public destroy(): void {
+    this.controller?.abort();
+    this.controller = undefined;
+    this.clearInputStream();
   }
 
   public readInputStream(): IInputEvent | undefined {
     return this.eventBuffer.pop();
+  }
+
+  public drainInputStream(): IInputEvent[] {
+    return this.eventBuffer.drain();
   }
 
   public clearInputStream(): void {

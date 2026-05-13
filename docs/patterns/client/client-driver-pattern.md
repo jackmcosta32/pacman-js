@@ -11,6 +11,7 @@ This guide documents how browser-specific concerns are isolated from the game ru
 - Let feature clients translate raw driver events into game-specific events.
 - Render serialized scene snapshots, not live engine objects.
 - Load assets before starting the game loop.
+- Stop browser loops and input listeners before restarting a client runtime.
 
 ## Why This Rule Exists
 
@@ -44,7 +45,13 @@ Use this ownership split:
 
 ## Example
 
-`PacmanGameClient` reads `KEYBOARD_EVENT_TYPE.KEY_DOWN` from `InputDriver`, maps `ArrowUp` to a Pac-Man movement event, forwards that event to `PacmanGame`, and renders the next serialized scene snapshot using `GraphicsDriver`.
+`PacmanGameClient` drains buffered input events from `InputDriver`, maps `KEYBOARD_EVENT_TYPE.KEY_DOWN` or `KEYBOARD_EVENT_TYPE.KEY_PRESSED` for `ArrowUp` to Pac-Man movement events, forwards mapped events to `PacmanGame`, and renders the next serialized scene snapshot using `GraphicsDriver`.
+
+`InputDriver.init()` resets previous keyboard listeners and clears stale input. Runtime clients should call `InputDriver.destroy()` during stop or restart cleanup.
+
+`GraphicsDriver.setResolution()` treats scene viewport dimensions as logical coordinates. It scales the physical canvas by `devicePixelRatio` and keeps CSS sizing at the logical resolution.
+
+`AssetsDriver` owns loading, timeout, failure reporting, and asset caching. It may load audio files, but playback belongs in a dedicated audio runtime boundary or feature-level orchestration once game sound events exist.
 
 ## Checklist
 
@@ -53,6 +60,7 @@ Use this ownership split:
 3. Keep feature-specific input mapping in the feature client.
 4. Load new assets through `AssetsDriver` before they are used by render code.
 5. Keep Canvas draw calls in `GraphicsDriver` unless a feature-specific renderer abstraction is introduced intentionally.
+6. Make repeated `start()` calls idempotent and pair restart flows with `stop()` cleanup.
 
 ## Anti-Patterns
 

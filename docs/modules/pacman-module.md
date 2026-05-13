@@ -22,7 +22,7 @@ It depends on the reusable game engine and browser client contracts, but owns th
 1. `src/main.ts` creates a `PacmanGame` and a `PacmanGameClient`.
 2. `PacmanGameClient.start()` initializes browser input, loads assets, subscribes to game snapshots, and starts the game.
 3. `PacmanGame.start()` creates the current scene and calls `scene.init()`.
-4. On each animation frame, the client reads one input event and maps supported arrow keys into Pac-Man movement events.
+4. On each animation frame, the client drains buffered input events and maps supported arrow keys into Pac-Man movement events.
 5. `PacmanGame.update()` drains queued events, groups them by type, updates the current scene, and notifies subscribers with the serialized scene.
 6. Pac-Man systems update actor movement state, position, and sprite animation frames.
 7. The client draws serialized UI and sprite components to the canvas.
@@ -39,5 +39,6 @@ It depends on the reusable game engine and browser client contracts, but owns th
 - Keep Pac-Man-specific rules in this module instead of moving them into the generic engine.
 - Keep reusable engine primitives in `src/packages/game-engine` when they are not specific to Pac-Man.
 - Keep browser API usage inside the client layer or driver implementations.
+- `PacmanGameClient.stop()` cancels the animation frame loop, unsubscribes from scene snapshots, destroys input listeners, and tears down the active game scene so a later `start()` can create a clean runtime.
 - Scene loading is currently static and marked for future dynamic loading; scene factories create fresh entities, managers, and systems for each load.
 - The physics system exists alongside the movement system but is not currently wired into the active game scene.

@@ -2,6 +2,7 @@ import type { IGame } from '@shared/interfaces/game.interface';
 import { PACMAN_EVENT_TYPE } from './constants/pacman-event.constant';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
+import type { IInputEvent } from '@shared/interfaces/event.interface';
 import { ACTOR_SPRITES, MENU_FONT } from '@pacman/config/pacman-asset.config';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
@@ -27,6 +28,12 @@ export class PacmanGameClient implements IGameClient {
   private readonly assetsDriver: IAssetsDriver;
   private readonly graphicsDriver: IGraphicsDriver;
   private lastTimestamp = performance.now();
+  private lifecycleToken = 0;
+  private isRunning = false;
+  private isSubscribed = false;
+  private pendingStart?: Promise<void>;
+  private animationFrameId?: number;
+  private readonly sceneListener = (scene: ISerializedScene) => this.syncGameScene(scene);
 
   constructor(params: IPacmanGameClientConstructor) {
     this.game = params.game;
@@ -68,11 +75,7 @@ export class PacmanGameClient implements IGameClient {
     });
   }
 
-  private readInputEvents(): IPacmanEvent | undefined {
-    const input = this.inputDriver.readInputStream();
-
-    if (!input) return;
-
+  private mapInputEvent(input: IInputEvent): IPacmanEvent | undefined {
     if (input.type === KEYBOARD_EVENT_TYPE.KEY_DOWN || input.type === KEYBOARD_EVENT_TYPE.KEY_PRESSED) {
       switch (input.keyCode) {
         case INPUT_SCHEME.UP:
@@ -133,7 +136,9 @@ export class PacmanGameClient implements IGameClient {
   }
 
   private update(timestamp?: number) {
-    requestAnimationFrame((timestamp) => this.update(timestamp));
+    if (!this.isRunning) return;
+
+    this.animationFrameId = requestAnimationFrame((timestamp) => this.update(timestamp));
 
     if (timestamp) {
       const elapsed = timestamp - this.lastTimestamp;
@@ -143,23 +148,82 @@ export class PacmanGameClient implements IGameClient {
       this.lastTimestamp = timestamp - (elapsed % SECONDS_PER_FRAME);
     }
 
-    const inputEvent = this.readInputEvents();
+    const inputEvents = this.inputDriver.drainInputStream();
 
-    this.game.readClientEvent(inputEvent);
+    inputEvents.forEach((inputEvent) => {
+      const pacmanEvent = this.mapInputEvent(inputEvent);
+
+      if (pacmanEvent) {
+        this.game.readClientEvent(pacmanEvent);
+      }
+    });
+
     this.game.update();
   }
 
-  public async start() {
+  public start(): Promise<void> {
+    if (this.isRunning) return Promise.resolve();
+    if (this.pendingStart) return this.pendingStart;
+
+    const startToken = ++this.lifecycleToken;
+    const pendingStart = this.startRuntime(startToken).finally(() => {
+      if (this.pendingStart === pendingStart) {
+        this.pendingStart = undefined;
+      }
+    });
+
+    this.pendingStart = pendingStart;
+
+    return pendingStart;
+  }
+
+  public stop(): void {
+    this.lifecycleToken += 1;
+    this.isRunning = false;
+
+    if (this.animationFrameId !== undefined) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = undefined;
+    }
+
+    if (this.isSubscribed) {
+      this.game.unsubscribe(this.sceneListener);
+      this.isSubscribed = false;
+    }
+
+    this.inputDriver.destroy();
+    this.game.destroy();
+
+    this.pendingStart = undefined;
+    this.currentSceneId = undefined;
+    this.lastTimestamp = performance.now();
+  }
+
+  private async startRuntime(startToken: number): Promise<void> {
     this.inputDriver.init();
 
-    await Promise.all([
-      this.assetsDriver.loadSpriteSheet(ACTOR_SPRITES),
-      this.assetsDriver.loadFontFace(MENU_FONT.id, MENU_FONT),
-    ]);
+    try {
+      await Promise.all([
+        this.assetsDriver.loadSpriteSheet(ACTOR_SPRITES),
+        this.assetsDriver.loadFontFace(MENU_FONT.id, MENU_FONT),
+      ]);
 
-    this.game.subscribe((scene) => this.syncGameScene(scene));
-    this.game.start();
+      if (startToken !== this.lifecycleToken) return;
 
-    this.update();
+      this.currentSceneId = undefined;
+      this.lastTimestamp = performance.now();
+      this.game.subscribe(this.sceneListener);
+      this.isSubscribed = true;
+      this.game.start();
+      this.isRunning = true;
+
+      this.update();
+    } catch (error) {
+      if (startToken !== this.lifecycleToken) return;
+
+      this.stop();
+
+      throw error;
+    }
   }
 }

@@ -11,13 +11,13 @@ export interface IGraphicsDriverConstructor {
 export class GraphicsDriver implements IGraphicsDriver {
   private readonly assetsDriver: IAssetsDriver;
   private readonly context: CanvasRenderingContext2D;
+  private logicalResolution: ISize = { width: 0, height: 0 };
 
   constructor(params: IGraphicsDriverConstructor) {
     this.context = params.context;
     this.assetsDriver = params.assetsDriver;
   }
 
-  // TODO: Handle pixel ratio
   public drawSprite(sprite: ISprite, position: ICoordinate) {
     const asset = this.assetsDriver.getAsset(sprite.spriteSheetId);
 
@@ -51,13 +51,20 @@ export class GraphicsDriver implements IGraphicsDriver {
   }
 
   public clear(position: ICoordinate) {
-    const canvas = this.context.canvas;
-
-    this.context.clearRect(position.x, position.y, canvas.width, canvas.height);
+    this.context.clearRect(position.x, position.y, this.logicalResolution.width, this.logicalResolution.height);
   }
 
   public setResolution(resolution: ISize) {
-    this.context.canvas.width = resolution.width;
-    this.context.canvas.height = resolution.height;
+    const pixelRatio = globalThis.devicePixelRatio || 1;
+    const canvas = this.context.canvas;
+
+    this.logicalResolution = { ...resolution };
+    canvas.width = Math.floor(resolution.width * pixelRatio);
+    canvas.height = Math.floor(resolution.height * pixelRatio);
+    canvas.style.width = `${resolution.width}px`;
+    canvas.style.height = `${resolution.height}px`;
+
+    this.context.setTransform(1, 0, 0, 1, 0, 0);
+    this.context.scale(pixelRatio, pixelRatio);
   }
 }

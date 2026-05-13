@@ -32,6 +32,10 @@ This directory documents the Pac-Man game application, the lightweight game engi
 
 - [Pac-Man game engine roadmap](./roadmap/pacman-game-engine-roadmap.md)
 
+## Testing
+
+- [Browser runtime smoke checklist](./testing/browser-runtime-smoke-checklist.md)
+
 ## Issues
 
 - [Issue documentation index](./issues/README.md)

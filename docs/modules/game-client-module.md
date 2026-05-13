@@ -18,8 +18,8 @@ The game client module contains browser-facing drivers and client contracts. It 
 2. The Pac-Man client initializes input listeners.
 3. The asset driver loads configured sprite and font assets before gameplay begins.
 4. The Pac-Man client subscribes to serialized scene snapshots from the game runtime.
-5. On every client update, the input driver exposes buffered keyboard events.
-6. The graphics driver clears the canvas, draws serialized text components, and draws serialized sprite components.
+5. On every client update, the input driver drains buffered keyboard events in insertion order.
+6. The graphics driver clears the canvas in logical scene coordinates, draws serialized text components, and draws serialized sprite components.
 
 ## Dependencies
 
@@ -31,5 +31,7 @@ The game client module contains browser-facing drivers and client contracts. It 
 
 - Keep direct browser API usage in drivers or browser client code.
 - Keep the engine render-agnostic by consuming only serialized scene data in the client.
-- The input driver currently stores keyboard events in a ring buffer and exposes one event at a time through `readInputStream()`.
-- The graphics driver currently renders raw sprite dimensions without pixel-ratio scaling.
+- The input driver stores keyboard events in a ring buffer. `drainInputStream()` is the per-frame path; `readInputStream()` remains available for one-at-a-time reads.
+- Repeated input driver initialization resets existing listeners and clears stale input.
+- The graphics driver scales the physical canvas by `devicePixelRatio` while preserving logical scene coordinates.
+- The asset driver loads and caches assets only. Audio playback should be added through a separate runtime boundary when sound events exist.

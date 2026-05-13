@@ -1,8 +1,16 @@
 import type { IAsset } from '@shared/interfaces/asset.interface';
 import type { IAssetsDriver } from '@game-client/interfaces/driver.interface';
 
+const DEFAULT_ASSET_LOAD_TIMEOUT_MS = 10000;
+
+type AssetElement = HTMLElement | FontFace;
+type AssetResolver = (asset: AssetElement) => void;
+type AssetRejecter = (error: Error) => void;
+type AssetLoader = (resolve: AssetResolver, reject: AssetRejecter) => void;
+
 export class AssetsDriver implements IAssetsDriver {
-  private readonly assets = new Map<string, HTMLElement | FontFace>();
+  private readonly assets = new Map<string, AssetElement>();
+  private readonly pendingAssets = new Map<string, Promise<boolean>>();
 
   public getAsset(id: string) {
     const asset = this.assets.get(id);
@@ -12,51 +20,100 @@ export class AssetsDriver implements IAssetsDriver {
     return asset;
   }
 
-  public async loadSpriteSheet(asset: IAsset): Promise<boolean> {
-    if (this.assets.has(asset.id)) return false;
-
-    return new Promise<boolean>((resolve, reject) => {
+  public loadSpriteSheet(asset: IAsset): Promise<boolean> {
+    return this.loadAsset(asset, 'sprite sheet', (resolve, reject) => {
       const image = new Image();
 
-      image.onload = () => {
-        this.assets.set(asset.id, image);
-
-        resolve(true);
-      };
-
-      image.onerror = () => reject(new Error(`Could not load sprite sheet asset ${asset.id}`));
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(this.createLoadError(asset, 'sprite sheet'));
 
       image.src = asset.pathname;
     });
   }
 
-  public async loadAudio(asset: IAsset): Promise<boolean> {
-    if (this.assets.has(asset.id)) return false;
-
-    return new Promise<boolean>((resolve, reject) => {
+  public loadAudio(asset: IAsset): Promise<boolean> {
+    return this.loadAsset(asset, 'audio', (resolve, reject) => {
       const audio = new Audio();
 
-      audio.oncanplaythrough = () => {
-        this.assets.set(asset.id, audio);
-
-        resolve(true);
-      };
-
-      audio.onerror = () => reject(new Error(`Could not load audio asset ${asset.id}`));
+      audio.oncanplaythrough = () => resolve(audio);
+      audio.onerror = () => reject(this.createLoadError(asset, 'audio'));
 
       audio.src = asset.pathname;
     });
   }
 
-  public async loadFontFace(family: string, asset: IAsset): Promise<boolean> {
-    if (this.assets.has(asset.id)) return false;
+  public loadFontFace(family: string, asset: IAsset): Promise<boolean> {
+    return this.loadAsset(asset, 'font face', (resolve, reject) => {
+      const fontFace = new FontFace(family, `url(${asset.pathname})`);
 
-    const fontFace = new FontFace(family, `url(${asset.pathname})`);
+      fontFace
+        .load()
+        .then((loadedFontFace) => {
+          globalThis.document?.fonts?.add(loadedFontFace);
 
-    await fontFace.load();
+          resolve(loadedFontFace);
+        })
+        .catch(() => reject(this.createLoadError(asset, 'font face')));
+    });
+  }
 
-    this.assets.set(asset.id, fontFace);
+  private loadAsset(asset: IAsset, type: string, loader: AssetLoader): Promise<boolean> {
+    if (this.assets.has(asset.id)) return Promise.resolve(false);
 
-    return true;
+    const pendingAsset = this.pendingAssets.get(asset.id);
+
+    if (pendingAsset) return pendingAsset;
+
+    const pendingLoad = new Promise<boolean>((resolve, reject) => {
+      let hasSettled = false;
+      let timeoutId: ReturnType<typeof setTimeout>;
+
+      const resolveOnce = (loadedAsset: AssetElement) => {
+        if (hasSettled) return;
+
+        hasSettled = true;
+        clearTimeout(timeoutId);
+        this.assets.set(asset.id, loadedAsset);
+
+        resolve(true);
+      };
+
+      const rejectOnce = (error: Error) => {
+        if (hasSettled) return;
+
+        hasSettled = true;
+        clearTimeout(timeoutId);
+
+        reject(error);
+      };
+
+      timeoutId = setTimeout(() => {
+        rejectOnce(
+          new Error(
+            `Timed out loading ${type} asset ${asset.id} from ${asset.pathname} after ${DEFAULT_ASSET_LOAD_TIMEOUT_MS}ms`,
+          ),
+        );
+      }, DEFAULT_ASSET_LOAD_TIMEOUT_MS);
+
+      try {
+        loader(resolveOnce, rejectOnce);
+      } catch (error) {
+        rejectOnce(
+          error instanceof Error
+            ? new Error(`Could not load ${type} asset ${asset.id} from ${asset.pathname}: ${error.message}`)
+            : this.createLoadError(asset, type),
+        );
+      }
+    }).finally(() => {
+      this.pendingAssets.delete(asset.id);
+    });
+
+    this.pendingAssets.set(asset.id, pendingLoad);
+
+    return pendingLoad;
+  }
+
+  private createLoadError(asset: IAsset, type: string) {
+    return new Error(`Could not load ${type} asset ${asset.id} from ${asset.pathname}`);
   }
 }
