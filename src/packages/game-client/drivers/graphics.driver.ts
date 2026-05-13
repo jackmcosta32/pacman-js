@@ -1,6 +1,6 @@
 import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { ICoordinate } from '@shared/interfaces/coordinate.interface';
-import type { ISprite, ITypographyOptions } from '@shared/interfaces/graphics.interface';
+import type { ISprite, IPrimitiveDrawStyle, ITypographyOptions } from '@shared/interfaces/graphics.interface';
 import type { IAssetsDriver, IGraphicsDriver } from '@game-client/interfaces/driver.interface';
 
 export interface IGraphicsDriverConstructor {
@@ -54,6 +54,32 @@ export class GraphicsDriver implements IGraphicsDriver {
     this.context.clearRect(position.x, position.y, this.logicalResolution.width, this.logicalResolution.height);
   }
 
+  public drawRectangle(position: ICoordinate, size: ISize, style: IPrimitiveDrawStyle = {}) {
+    this.applyPrimitiveStyle(style);
+
+    if (style.fillColor) {
+      this.context.fillRect(position.x, position.y, size.width, size.height);
+    }
+
+    if (style.strokeColor) {
+      this.context.strokeRect(position.x, position.y, size.width, size.height);
+    }
+  }
+
+  public drawCircle(center: ICoordinate, radius: number, style: IPrimitiveDrawStyle = {}) {
+    this.applyPrimitiveStyle(style);
+    this.context.beginPath();
+    this.context.arc(center.x, center.y, radius, 0, Math.PI * 2);
+
+    if (style.fillColor) {
+      this.context.fill();
+    }
+
+    if (style.strokeColor) {
+      this.context.stroke();
+    }
+  }
+
   public setResolution(resolution: ISize) {
     const pixelRatio = globalThis.devicePixelRatio || 1;
     const canvas = this.context.canvas;
@@ -66,5 +92,11 @@ export class GraphicsDriver implements IGraphicsDriver {
 
     this.context.setTransform(1, 0, 0, 1, 0, 0);
     this.context.scale(pixelRatio, pixelRatio);
+  }
+
+  private applyPrimitiveStyle(style: IPrimitiveDrawStyle) {
+    if (style.fillColor) this.context.fillStyle = style.fillColor;
+    if (style.strokeColor) this.context.strokeStyle = style.strokeColor;
+    if (style.lineWidth !== undefined) this.context.lineWidth = style.lineWidth;
   }
 }

@@ -15,8 +15,14 @@ const makeContext = () => {
   return {
     canvas,
     scale: vi.fn(),
+    fill: vi.fn(),
+    stroke: vi.fn(),
+    beginPath: vi.fn(),
+    fillRect: vi.fn(),
+    strokeRect: vi.fn(),
     fillText: vi.fn(),
     drawImage: vi.fn(),
+    arc: vi.fn(),
     clearRect: vi.fn(),
     setTransform: vi.fn(),
   } as unknown as CanvasRenderingContext2D;
@@ -55,5 +61,33 @@ describe('Game Client - GraphicsDriver', () => {
     sut.clear({ x: 4, y: 8 });
 
     expect(context.clearRect).toHaveBeenCalledWith(4, 8, 100, 50);
+  });
+
+  it('should draw styled rectangles', () => {
+    const context = makeContext();
+    const assetsDriver = { getAsset: vi.fn() } as unknown as IAssetsDriver;
+    const sut = new GraphicsDriver({ context, assetsDriver });
+
+    sut.drawRectangle({ x: 10, y: 12 }, { width: 20, height: 24 }, { fillColor: 'blue', strokeColor: 'white', lineWidth: 2 });
+
+    expect(context.fillStyle).toBe('blue');
+    expect(context.strokeStyle).toBe('white');
+    expect(context.lineWidth).toBe(2);
+    expect(context.fillRect).toHaveBeenCalledWith(10, 12, 20, 24);
+    expect(context.strokeRect).toHaveBeenCalledWith(10, 12, 20, 24);
+  });
+
+  it('should draw styled circles', () => {
+    const context = makeContext();
+    const assetsDriver = { getAsset: vi.fn() } as unknown as IAssetsDriver;
+    const sut = new GraphicsDriver({ context, assetsDriver });
+
+    sut.drawCircle({ x: 30, y: 32 }, 6, { fillColor: 'yellow' });
+
+    expect(context.fillStyle).toBe('yellow');
+    expect(context.beginPath).toHaveBeenCalled();
+    expect(context.arc).toHaveBeenCalledWith(30, 32, 6, 0, Math.PI * 2);
+    expect(context.fill).toHaveBeenCalled();
+    expect(context.stroke).not.toHaveBeenCalled();
   });
 });

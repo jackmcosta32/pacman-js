@@ -18,6 +18,7 @@ This directory documents the Pac-Man game application, the lightweight game engi
 ## Game Patterns
 
 - [Entity-component-system pattern](./patterns/game/entity-component-system-pattern.md)
+- [Pac-Man level data pattern](./patterns/game/pacman-level-data-pattern.md)
 - [Scene serialization pattern](./patterns/game/scene-serialization-pattern.md)
 
 ## Client Patterns

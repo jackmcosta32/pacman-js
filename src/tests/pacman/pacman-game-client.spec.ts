@@ -5,6 +5,9 @@ import { INPUT_SCHEME } from '@pacman/config/pacman-game.config';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 import type { IGame } from '@shared/interfaces/game.interface';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
+import { COMPONENT_TYPE } from '@shared/constants/component.constant';
+import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
+import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 
@@ -72,7 +75,9 @@ const makeGraphicsDriver = () =>
   ({
     clear: vi.fn(),
     drawText: vi.fn(),
+    drawCircle: vi.fn(),
     drawSprite: vi.fn(),
+    drawRectangle: vi.fn(),
     setResolution: vi.fn(),
   }) as unknown as IGraphicsDriver;
 
@@ -222,5 +227,92 @@ describe('Pac-Man - PacmanGameClient', () => {
 
     expect(game.readClientEvent).not.toHaveBeenCalled();
     expect(game.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw walls, collectibles, and actors in scene order groups', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver();
+    const assetsDriver = makeAssetsDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+
+    await sut.start();
+
+    const sceneListener = vi.mocked(game.subscribe).mock.calls[0][0];
+
+    sceneListener({
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'actor',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 48, y: 0 },
+              boundingBox: { x: 48, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 72, y: 24 },
+            },
+            [COMPONENT_TYPE.SPRITE_COMPONENT]: {
+              type: COMPONENT_TYPE.SPRITE_COMPONENT,
+              sprite: { spriteSheetId: 'ACTOR_SPRITES', x: 0, y: 0, width: 48, height: 48 },
+            },
+          },
+        },
+        {
+          id: 'pellet',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 48, y: 0 },
+              boundingBox: { x: 48, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 72, y: 24 },
+            },
+            [PACMAN_COMPONENT_TYPE.COLLECTIBLE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.COLLECTIBLE_COMPONENT,
+              scoreValue: 10,
+              collectibleType: PACMAN_COLLECTIBLE_TYPE.PELLET,
+            },
+          },
+        },
+        {
+          id: 'wall',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 0, y: 0 },
+              boundingBox: { x: 0, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 24, y: 24 },
+            },
+            [PACMAN_COMPONENT_TYPE.TILE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.TILE_COMPONENT,
+              row: 0,
+              column: 0,
+              symbol: '#',
+              walkable: false,
+              blocking: true,
+              tileType: PACMAN_TILE_TYPE.WALL,
+            },
+          },
+        },
+      ],
+    });
+
+    expect(graphicsDriver.drawRectangle).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: 0, y: 0, width: 48, height: 48 },
+      { fillColor: '#0b35f0', strokeColor: '#5c8dff', lineWidth: 2 },
+    );
+    expect(graphicsDriver.drawCircle).toHaveBeenCalledWith({ x: 72, y: 24 }, 3.84, { fillColor: '#f8e6b0' });
+    expect(graphicsDriver.drawSprite).toHaveBeenCalled();
+    expect(vi.mocked(graphicsDriver.drawRectangle).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(graphicsDriver.drawCircle).mock.invocationCallOrder[0],
+    );
+    expect(vi.mocked(graphicsDriver.drawCircle).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(graphicsDriver.drawSprite).mock.invocationCallOrder[0],
+    );
   });
 });

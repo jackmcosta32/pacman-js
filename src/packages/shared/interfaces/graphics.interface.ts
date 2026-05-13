@@ -17,3 +17,9 @@ export interface ISprite extends ICoordinate {
 }
 
 export type ISpriteFrames = ISprite | ISprite[];
+
+export interface IPrimitiveDrawStyle {
+  fillColor?: string;
+  strokeColor?: string;
+  lineWidth?: number;
+}
