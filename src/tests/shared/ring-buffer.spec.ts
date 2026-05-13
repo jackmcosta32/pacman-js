@@ -3,7 +3,7 @@ import { RingBuffer, type IRingBufferConstructor } from '@shared/data-structures
 
 const makeSut = <Element>(params?: Partial<IRingBufferConstructor>) => {
   return new RingBuffer<Element>({
-    size: 10,
+    maxLength: 10,
     ...params,
   });
 };
@@ -12,11 +12,12 @@ describe('Data Structures - RingBuffer', () => {
   it('should be able to push an element', () => {
     const sut = makeSut<number>();
 
-    expect(sut['elements'].length).toBe(0);
+    expect(sut.length).toBe(0);
 
     sut.push(1);
 
-    expect(sut['elements']).toContain(1);
+    expect(sut.peek()).toBe(1);
+    expect(sut.length).toBe(1);
   });
 
   it('should be able to pop an element', () => {
@@ -68,5 +69,42 @@ describe('Data Structures - RingBuffer', () => {
     expect(sut.length).toBe(0);
     expect(sut.peek()).toBeUndefined();
     expect(sut.isEmpty).toBeTruthy();
+  });
+
+  it('should be able to drain the buffer in insertion order', () => {
+    const sut = makeSut<number>();
+
+    sut.push(1);
+    sut.push(2);
+    sut.push(3);
+
+    expect(sut.drain()).toEqual([1, 2, 3]);
+    expect(sut.isEmpty).toBeTruthy();
+  });
+
+  it('should expose its maximum length', () => {
+    const sut = makeSut<number>({ maxLength: 3 });
+
+    expect(sut.maxLength).toBe(3);
+  });
+
+  it('should become full when reaching maximum length', () => {
+    const sut = makeSut<number>({ maxLength: 2 });
+
+    sut.push(1);
+    sut.push(2);
+
+    expect(sut.isFull).toBeTruthy();
+    expect(sut.length).toBe(2);
+  });
+
+  it('should overwrite the oldest element when pushing past capacity', () => {
+    const sut = makeSut<number>({ maxLength: 2 });
+
+    sut.push(1);
+    sut.push(2);
+    sut.push(3);
+
+    expect(sut.drain()).toEqual([2, 3]);
   });
 });

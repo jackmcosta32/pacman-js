@@ -40,7 +40,7 @@ export class EntityManager implements IEntityManager {
   }
 
   public forEachEntity(callback: (entity: IEntity) => void) {
-    return this.entities.forEach(callback);
+    return this.entities.forEach((entity) => callback(entity));
   }
 
   public clear() {

@@ -4,8 +4,10 @@ import { Component } from '@game-engine/core/component';
 class MockedComponent extends Component {
   public static readonly type = 'MOCKED_COMPONENT';
 
-  public update(): void {
-    return;
+  public serialize() {
+    return {
+      type: this.type,
+    };
   }
 }
 

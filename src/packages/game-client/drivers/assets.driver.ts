@@ -15,35 +15,37 @@ export class AssetsDriver implements IAssetsDriver {
   public async loadSpriteSheet(asset: IAsset): Promise<boolean> {
     if (this.assets.has(asset.id)) return false;
 
-    const image = new Image();
-    image.src = asset.pathname;
+    return new Promise<boolean>((resolve, reject) => {
+      const image = new Image();
 
-    const { resolve, promise } = Promise.withResolvers<boolean>();
+      image.onload = () => {
+        this.assets.set(asset.id, image);
 
-    image.onload = () => {
-      this.assets.set(asset.id, image);
+        resolve(true);
+      };
 
-      resolve(true);
-    };
+      image.onerror = () => reject(new Error(`Could not load sprite sheet asset ${asset.id}`));
 
-    return promise;
+      image.src = asset.pathname;
+    });
   }
 
   public async loadAudio(asset: IAsset): Promise<boolean> {
     if (this.assets.has(asset.id)) return false;
 
-    const audio = new Audio();
-    audio.src = asset.pathname;
+    return new Promise<boolean>((resolve, reject) => {
+      const audio = new Audio();
 
-    const { resolve, promise } = Promise.withResolvers<boolean>();
+      audio.oncanplaythrough = () => {
+        this.assets.set(asset.id, audio);
 
-    audio.onload = () => {
-      this.assets.set(asset.id, audio);
+        resolve(true);
+      };
 
-      resolve(true);
-    };
+      audio.onerror = () => reject(new Error(`Could not load audio asset ${asset.id}`));
 
-    return promise;
+      audio.src = asset.pathname;
+    });
   }
 
   public async loadFontFace(family: string, asset: IAsset): Promise<boolean> {

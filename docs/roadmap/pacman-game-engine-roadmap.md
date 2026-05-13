@@ -13,29 +13,25 @@ The project currently has the right high-level shape:
 - `src/packages/game-engine` owns reusable entity, component, system, scene, manager, and utility primitives.
 - `src/packages/game-client` owns browser-facing input, asset, and graphics drivers.
 - `src/packages/shared` owns framework-agnostic contracts, constants, data structures, and helpers.
-- `src/app/pacman` owns Pac-Man scenes, actors, sprites, events, systems, factories, and client orchestration.
+- `src/app/pacman` owns Pac-Man scene factories, actors, sprites, events, systems, factories, and client orchestration.
 
-The current implementation is not yet build-clean or test-clean.
+Milestone 0 restores this baseline so the current implementation is build-clean and test-clean before gameplay work continues.
 
-Observed baseline checks:
+Expected baseline checks:
 
-- `pnpm build` fails.
-- `pnpm exec vitest run` fails.
+- `pnpm build` passes.
+- `pnpm exec vitest run` passes.
 
-The failures point to architecture drift rather than one isolated bug:
+Milestone 0 resolved these architecture drift points:
 
-- `PacmanGame` implements `IGame`, but `IGame` requires `init()` and the class does not provide it.
-- `PacmanGame.start()` calls `scene.init()`, but `IScene` does not currently declare `init()`.
-- `Scene` now requires `eventQueue` and `entityManager`, while some scene definitions and tests still pass older constructor shapes.
-- `PacmanGameScene` imports and prepares physics-related state, but the active systems only include animation and movement.
-- `PacmanMainMenuScene` passes `entities` directly to `Scene`, but `Scene` expects an `EntityManager`.
-- `RenderComponent` imports missing or incorrect types and serializes no render payload.
-- `CollisionComponentMocker` references a missing `collision.component`.
-- `RingBuffer` tests use an old constructor property named `size` instead of `maxLength`.
-- `scene.spec.ts` expects `Scene.addEntity()`, but entity mutation has moved to `EntityManager`.
-- `entity-manager.spec.ts` exists but has no tests.
-- `tsconfig.json` uses `ES2024`, while the installed TypeScript version only accepts targets through `ES2023` or `ESNext`.
-- `AssetsDriver` uses `Promise.withResolvers`, which is not available under the current TypeScript/lib setup.
+- `PacmanGame.start()` is the public game initialization entry point.
+- `IScene` declares `init()`, and scene lifecycle hooks receive complete scene state.
+- Scene factories pass `eventQueue` and fresh `EntityManager` instances to `Scene`.
+- Experimental physics/collision state is deferred until the movement and collision milestones.
+- Generic render abstraction is deferred; `SpriteComponent` and `UIComponent` are the active renderable serialized components.
+- `RingBuffer`, scene, and entity manager tests assert the current API shapes.
+- `tsconfig.json` uses the supported `ES2023` target/lib.
+- `AssetsDriver` uses compatibility-safe promise wrappers.
 - Canvas rendering currently does not handle device pixel ratio.
 
 ## Guiding Architecture
@@ -69,8 +65,8 @@ Make the project compile and make the test suite describe the current architectu
 - Update `scene.spec.ts` to test current `Scene` behavior, or add explicit scene helper methods if `Scene.addEntity()` is intentionally part of the public API.
 - Update `ring-buffer.spec.ts` to use `maxLength`.
 - Add real tests to `entity-manager.spec.ts`.
-- Remove the stale collision mock or implement a real collision component.
-- Fix `RenderComponent` imports and decide whether it remains part of the engine.
+- Remove the stale collision mock and defer collision implementation to Milestone 4.
+- Remove the unused generic `RenderComponent`; sprite and UI components remain the active renderable serialized components.
 - Replace `Promise.withResolvers` with a compatibility-safe promise wrapper, or intentionally upgrade the TypeScript/lib/runtime target.
 - Remove unused imports and variables surfaced by `noUnusedLocals` and `noUnusedParameters`.
 

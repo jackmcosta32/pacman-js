@@ -10,7 +10,6 @@ export interface IGameState {
 }
 
 export interface IGame extends IObserver<Callback<ISerializedScene>> {
-  init(): void;
   start(): void;
   update(): void;
   destroy(): void;

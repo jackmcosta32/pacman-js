@@ -17,6 +17,7 @@ The current app has useful engine pieces, but several interfaces, tests, and sce
 - Update `tsconfig.json` to use a supported `target` and `lib`.
 - Prefer `ES2023` or `ESNext` based on whether the project wants stable TypeScript support or the newest language APIs.
 - Verify that Vite and Vitest still resolve path aliases after the change.
+- Current baseline decision: use `ES2023` for stable TypeScript support.
 
 Affected areas:
 
@@ -31,6 +32,7 @@ Verification:
 - Decide whether `IGame` should expose `init()` or whether `start()` is the initialization entry point.
 - Update `IGame` and `PacmanGame` so the interface and implementation match.
 - Keep the public lifecycle small and explicit.
+- Current baseline decision: `start()` is the public game initialization entry point.
 
 Affected areas:
 
@@ -47,6 +49,7 @@ Verification:
 - Add `init()` to `IScene` if scene initialization is part of the engine lifecycle.
 - Ensure `Scene.init()`, `Scene.update()`, and `Scene.destroy()` all satisfy the interface.
 - Make lifecycle state passed to systems consistent.
+- Current baseline decision: `IScene` exposes `init()`, and all scene lifecycle hooks pass complete scene state.
 
 Affected areas:
 
@@ -64,6 +67,7 @@ Verification:
 - Pass an `EntityManager` instead of raw `entities`.
 - Pass an `eventQueue` where required, or move event queue ownership if the constructor contract changes.
 - Remove unused scene imports and experimental variables until they are wired.
+- Current baseline decision: Pac-Man scene modules export factories that receive the game event queue and create fresh entities, managers, and systems for each scene load.
 
 Affected areas:
 
@@ -80,6 +84,7 @@ Verification:
 - Update `scene.spec.ts` to test the current `Scene` API.
 - If `Scene.addEntity()` is desired, add it intentionally and delegate to `EntityManager`.
 - If entity mutation belongs only to `EntityManager`, update tests to assert serialization and lifecycle behavior instead.
+- Current baseline decision: entity mutation remains owned by `EntityManager`; `Scene.addEntity()` is not part of the public scene API.
 
 Affected areas:
 
@@ -95,6 +100,7 @@ Verification:
 - Update tests to use `maxLength` instead of the old `size` constructor field.
 - Align expectations with the current fixed-capacity internal array.
 - Prefer public behavior assertions over private `elements` assertions where possible.
+- Current baseline decision: tests assert public `RingBuffer` behavior, including direct fixed-capacity overwrite behavior.
 
 Affected areas:
 
@@ -109,6 +115,7 @@ Verification:
 
 - Add tests for `EntityManager` add, duplicate add, get, has, remove, iterate, clear, and serialize behavior.
 - Keep the tests focused on the manager, not on scene behavior.
+- Current baseline decision: `EntityManager` owns entity mutation and exposes iteration through a single-entity callback contract.
 
 Affected areas:
 
@@ -124,6 +131,7 @@ Verification:
 - Either implement a real `CollisionComponent`, or remove the stale mock until collision work begins.
 - If implemented now, keep it generic and engine-owned.
 - If deferred, document collision work in Milestone 4 and keep tests build-clean.
+- Current baseline decision: defer collision implementation to Milestone 4 and remove the stale mock.
 
 Affected areas:
 
@@ -139,6 +147,7 @@ Verification:
 - Decide whether `RenderComponent` is needed in addition to `SpriteComponent` and `UIComponent`.
 - If kept, fix imports and define its serialized payload.
 - If not needed, remove it and remove its shared constant entry.
+- Current baseline decision: remove the unused generic `RenderComponent`; `SpriteComponent` and `UIComponent` remain the active serialized render components.
 
 Affected areas:
 
@@ -155,6 +164,7 @@ Verification:
 - Replace `Promise.withResolvers` in `AssetsDriver` with a local `new Promise` wrapper.
 - Keep image and audio load behavior equivalent.
 - Add error handling if possible without broadening scope too much.
+- Current baseline decision: use compatibility-safe promise wrappers with narrow load-error rejection.
 
 Affected areas:
 

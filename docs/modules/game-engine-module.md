@@ -7,7 +7,7 @@ The game engine module provides reusable runtime primitives for entity-component
 ## Main Components
 
 - `src/packages/game-engine/core`: base `Entity`, `Component`, `System`, and `Scene` implementations.
-- `src/packages/game-engine/components`: reusable components such as position, sprite, UI, control, camera, and render data.
+- `src/packages/game-engine/components`: reusable components such as position, sprite, UI, control, and camera data.
 - `src/packages/game-engine/interfaces`: contracts for scenes, entities, components, systems, and managers.
 - `src/packages/game-engine/managers`: entity and system collection managers.
 - `src/packages/game-engine/factories`: entity factories for generic entities and text entities.
@@ -35,3 +35,4 @@ The game engine module provides reusable runtime primitives for entity-component
 - Components expose a static `type` and serialize their own public render or state data.
 - Systems should operate through scene state and entity components rather than owning feature-specific global state.
 - The serialized scene is the boundary consumed by browser rendering code.
+- Generic collision and render abstraction components are deferred until gameplay or rendering needs make their payloads concrete.

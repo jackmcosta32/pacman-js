@@ -20,6 +20,7 @@ export interface ISceneState {
 
 export interface IScene {
   id: string;
+  init(): void;
   destroy(): void;
   serialize(): ISerializedScene;
   update(gameState: IGameState): void;

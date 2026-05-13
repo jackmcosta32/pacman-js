@@ -1,10 +1,8 @@
-// TODO: Scenes need to be loaded dynamically
-import { PacmanGameScene } from './scenes/pacman-game.scene';
-import { PacmanMainMenuScene } from './scenes/pacman-main-menu.scene';
-
 import groupBy from 'lodash/groupBy';
 import { Observer } from '@shared/patterns/observer';
 import { Queue } from '@shared/data-structures/queue';
+import { PACMAN_SCENE } from '@pacman/constants/pacman-scene.constant';
+import { createPacmanGameScene } from '@pacman/scenes/pacman-game.scene';
 import type { Callback } from '@shared/types/util.type';
 import type { IGame } from '@shared/interfaces/game.interface';
 import type { IEvent } from '@shared/interfaces/event.interface';
@@ -30,11 +28,13 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
   }
 
   public loadScene(id: string): void {
-    this.currentScene = PacmanGameScene;
+    if (id === PACMAN_SCENE.CLASSIC_MATCH) {
+      this.currentScene = createPacmanGameScene(this.eventQueue);
+    }
   }
 
   public start(): void {
-    this.currentScene = PacmanGameScene;
+    this.loadScene(PACMAN_SCENE.CLASSIC_MATCH);
 
     if (!this.currentScene) {
       throw new Error('Scene not initialized');

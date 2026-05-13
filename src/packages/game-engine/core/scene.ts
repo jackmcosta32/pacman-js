@@ -4,7 +4,7 @@ import type { ISize } from '@shared/interfaces/geometry.interface';
 import type { IGameState } from '@shared/interfaces/game.interface';
 import type { ISystem } from '@game-engine/interfaces/system.interface';
 import type { IEntityManager } from '@game-engine/interfaces/entity.interface';
-import type { IScene, ISerializedScene } from '@game-engine/interfaces/scene.interface';
+import type { IScene, ISceneState, ISerializedScene } from '@game-engine/interfaces/scene.interface';
 
 export interface ISceneConstructor {
   id: string;
@@ -34,14 +34,17 @@ export class Scene implements IScene {
   }
 
   public init(): void {
+    const sceneState: ISceneState = {
+      elapsed: 0,
+      eventMap: {},
+      eventQueue: this.eventQueue,
+      entityManager: this.entityManager,
+    };
+
     this.systems.forEach((system) => {
       if (!system.init) return;
 
-      system.init({
-        elapsed: 0,
-        eventQueue: this.eventQueue,
-        entityManager: this.entityManager,
-      });
+      system.init(sceneState);
     });
   }
 
@@ -54,24 +57,32 @@ export class Scene implements IScene {
       elapsed = currentTimeStamp - this.lastUpdateTimestamp;
     }
 
-    this.systems.forEach((system) =>
+    this.systems.forEach((system) => {
+      if (!system.update) return;
+
       system.update({
         elapsed,
         eventMap: gameState.eventMap,
         eventQueue: gameState.eventQueue,
         entityManager: this.entityManager,
-      }),
-    );
+      });
+    });
 
     this.lastUpdateTimestamp = currentTimeStamp;
   }
 
   public destroy() {
+    const sceneState: ISceneState = {
+      elapsed: 0,
+      eventMap: {},
+      eventQueue: this.eventQueue,
+      entityManager: this.entityManager,
+    };
+
     this.systems.forEach((system) => {
-      system.destroy({
-        elapsed: 0,
-        entityManager: this.entityManager,
-      });
+      if (!system.destroy) return;
+
+      system.destroy(sceneState);
     });
 
     this.entityManager.clear();

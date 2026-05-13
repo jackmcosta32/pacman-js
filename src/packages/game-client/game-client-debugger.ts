@@ -4,6 +4,8 @@ export class GameClientDebugger implements IGameClientDebugger {
   private enabled = true;
 
   public log(level: ILogLevel, ...args: unknown[]): void {
+    if (!this.enabled) return;
+
     console[level](args);
   }
 }

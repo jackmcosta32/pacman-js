@@ -5,8 +5,10 @@ import { Entity, IEntityConstructor } from '@game-engine/core/entity';
 class MockedComponent extends Component {
   public static readonly type = 'MOCKED_COMPONENT';
 
-  public update(): void {
-    return;
+  public serialize() {
+    return {
+      type: this.type,
+    };
   }
 }
 
