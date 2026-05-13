@@ -71,7 +71,7 @@ export class SpriteComponent extends Component {
   public serialize(): ISerializedComponent {
     return {
       type: this.type,
-      sprite: this.sprite,
+      sprite: { ...this.sprite },
     };
   }
 }

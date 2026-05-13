@@ -16,14 +16,14 @@ export class SystemManager implements ISystemManager {
     params?.systems?.forEach((system) => this.addSystem(system));
   }
 
-  public getSystem<System extends ISystem>(constructor: ISystemConstructor<System>): System {
-    return this.systems.get(constructor.id) as System;
+  public getSystem<System extends ISystem>(constructor: ISystemConstructor<System>): System | undefined {
+    return this.systems.get(constructor.id) as System | undefined;
   }
 
-  public addSystem(entity: ISystem) {
-    if (this.systems.has(entity.id)) return false;
+  public addSystem(system: ISystem) {
+    if (this.systems.has(system.id)) return false;
 
-    this.systems.set(entity.id, entity);
+    this.systems.set(system.id, system);
 
     return true;
   }
@@ -36,8 +36,8 @@ export class SystemManager implements ISystemManager {
     return true;
   }
 
-  public forEachSystem(callback: (entity: ISystem) => void) {
-    return this.systems.forEach(callback);
+  public forEachSystem(callback: (system: ISystem) => void) {
+    return this.systems.forEach((system) => callback(system));
   }
 
   public clear() {
@@ -47,8 +47,8 @@ export class SystemManager implements ISystemManager {
   public serialize(): ISerializedSystem[] {
     const serializedSystems = [];
 
-    for (const entity of this.systems.values()) {
-      serializedSystems.push(entity.serialize());
+    for (const system of this.systems.values()) {
+      serializedSystems.push(system.serialize());
     }
 
     return serializedSystems;

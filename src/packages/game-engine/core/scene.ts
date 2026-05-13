@@ -53,12 +53,12 @@ export class Scene implements IScene {
 
     let elapsed = 0;
 
-    if (this.lastUpdateTimestamp) {
+    if (this.lastUpdateTimestamp !== undefined) {
       elapsed = currentTimeStamp - this.lastUpdateTimestamp;
     }
 
     this.systems.forEach((system) => {
-      if (!system.update) return;
+      if (!system.enabled || !system.update) return;
 
       system.update({
         elapsed,
@@ -91,8 +91,8 @@ export class Scene implements IScene {
   public serialize(): ISerializedScene {
     return {
       id: this.id,
-      size: this.size,
-      viewport: this.viewport,
+      size: { ...this.size },
+      viewport: { ...this.viewport },
       entities: this.entityManager.serialize(),
     };
   }

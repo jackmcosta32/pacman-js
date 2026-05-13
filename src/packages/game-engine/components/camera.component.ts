@@ -34,7 +34,7 @@ export class CameraComponent extends Component {
   public serialize(): ISerializedComponent {
     return {
       type: this.type,
-      viewport: this.viewport,
+      viewport: { ...this.viewport },
     };
   }
 }

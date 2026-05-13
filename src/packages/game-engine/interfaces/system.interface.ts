@@ -1,10 +1,8 @@
 import type { Constructor } from '@shared/types/util.type';
 import type { ISceneState } from '@game-engine/interfaces/scene.interface';
-import type { IEntityManager } from '@game-engine/interfaces/entity.interface';
 
 export interface ISystemConstructor<Component> extends Constructor<Component> {
   id: string;
-  entityManager: IEntityManager;
 }
 
 export interface ISerializedSystem {
@@ -19,10 +17,6 @@ export interface ISystem {
   init?: (sceneState: ISceneState) => void;
   update?: (sceneState: ISceneState) => void;
   destroy?: (sceneState: ISceneState) => void;
-}
-
-export interface ISerializedSystem {
-  id: string;
 }
 
 export interface ISystemManager {

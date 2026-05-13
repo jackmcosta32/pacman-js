@@ -17,6 +17,7 @@ Pac-Man gameplay will require movement, collision, scoring, collectibles, ghost 
 - Define the meaning of `init`, `start`, `update`, and `destroy`.
 - Decide which lifecycle methods belong to `Game`, `Scene`, and `System`.
 - Keep naming consistent across interfaces and classes.
+- Current milestone decision: `Game` exposes `start`, `update`, `destroy`, and `readClientEvent`; `Scene` exposes `init`, `update`, `destroy`, and `serialize`; `System` exposes optional `init`, `update`, and `destroy` hooks.
 
 Affected areas:
 
@@ -35,6 +36,7 @@ Verification:
 - Ensure every system lifecycle call receives a complete `ISceneState`.
 - Provide `elapsed`, `eventQueue`, `eventMap`, and `entityManager` consistently.
 - Use an empty event map during initialization and teardown when no events exist.
+- Current milestone decision: all scene lifecycle calls pass complete scene state; `init` and `destroy` use `elapsed: 0` and `eventMap: {}`.
 
 Affected areas:
 
@@ -50,6 +52,7 @@ Verification:
 - Decide whether disabled systems skip only `update()` or all lifecycle calls.
 - Make `Scene` respect `system.enabled`.
 - Add tests for enabled and disabled systems.
+- Current milestone decision: disabled systems skip `update()` only; `init()` and `destroy()` still run.
 
 Affected areas:
 
@@ -65,6 +68,7 @@ Verification:
 - Decide whether scenes should keep `systems: ISystem[]` or own a `SystemManager`.
 - If `SystemManager` is kept, integrate it consistently.
 - If direct arrays are preferred, remove unused manager abstractions or leave them for future use with tests.
+- Current milestone decision: `Scene` keeps a direct ordered systems array; `SystemManager` remains standalone and tested.
 
 Affected areas:
 
@@ -81,6 +85,7 @@ Verification:
 - Decide whether entity add/remove operations are public scene helpers or only manager operations.
 - Keep one canonical path for adding and removing entities.
 - Update docs and tests to match that path.
+- Current milestone decision: entity mutation remains owned by `EntityManager`; no scene add/remove helpers are added.
 
 Affected areas:
 
@@ -97,6 +102,7 @@ Verification:
 - Ensure every component serializes enough state for the client or debugging.
 - Avoid leaking live class instances into serialized scene output.
 - Keep component `type` values stable and unique.
+- Current milestone decision: scene metadata and mutable nested component payloads are cloned during serialization.
 
 Affected areas:
 
@@ -116,6 +122,7 @@ Verification:
 - Add tests for elapsed time behavior.
 - Add tests for scene serialization.
 - Add tests for destroy cleanup.
+- Current milestone decision: runtime tests cover lifecycle state, disabled update behavior, update order, elapsed time, event delivery, manager boundaries, and serialization snapshots.
 
 Affected areas:
 

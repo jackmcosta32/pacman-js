@@ -11,6 +11,7 @@ This guide documents the runtime boundary between the game simulation and browse
 - Group queued events by type before systems consume them.
 - Keep scene updates deterministic with respect to elapsed time, queued events, systems, and entity state.
 - Keep render-only browser details out of serialized game state.
+- Return stable snapshot payloads from serialization instead of live mutable object references.
 
 ## Why This Rule Exists
 
@@ -49,7 +50,8 @@ InputDriver
 1. New client input should become a typed event before entering the game runtime.
 2. New systems should read events from `sceneState.eventMap` or shared scene state.
 3. New renderable component data should be included in `serialize()`.
-4. Client rendering should consume serialized data instead of concrete component instances.
+4. Scene metadata and component serialization should clone nested payload objects where those objects are mutable runtime state.
+5. Client rendering should consume serialized data instead of concrete component instances.
 
 ## Anti-Patterns
 
@@ -57,3 +59,4 @@ InputDriver
 - Do not pass Canvas context or DOM objects into scenes or systems.
 - Do not make systems depend on serialized output from another system.
 - Do not hide event flow in feature globals when the queue already exists.
+- Do not expose live component or scene metadata objects through serialized snapshots.

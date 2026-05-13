@@ -93,9 +93,10 @@ Make the reusable engine reliable enough to support real gameplay systems.
   - `destroy`.
 - Ensure `Scene.init()`, `Scene.update()`, and `Scene.destroy()` always pass a complete `ISceneState`.
 - Decide how disabled systems behave:
-  - skip disabled systems in `Scene.update()`;
-  - optionally skip disabled systems in lifecycle hooks.
-- Decide whether `SystemManager` is needed by `Scene`, or whether scenes should keep a direct `systems` array.
+  - disabled systems skip `Scene.update()` calls;
+  - initialization and teardown hooks still run.
+- Keep scenes on a direct ordered `systems` array for now.
+- Keep `SystemManager` as a standalone tested manager instead of wiring it into scenes.
 - Add tests for:
   - system lifecycle calls;
   - elapsed time flow;
@@ -103,6 +104,7 @@ Make the reusable engine reliable enough to support real gameplay systems.
   - entity serialization;
   - scene cleanup.
 - Keep component serialization explicit and stable.
+- Clone mutable scene metadata and component payload objects in serialized snapshots.
 
 ### Exit Criteria
 

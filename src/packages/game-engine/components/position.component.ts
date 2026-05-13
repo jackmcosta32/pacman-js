@@ -52,9 +52,9 @@ export class PositionComponent extends Component {
   public serialize(): ISerializedPositionComponent {
     return {
       type: this.type,
-      position: this.position,
-      boundingBox: this.boundingBox,
-      centerPosition: this.centerPosition,
+      position: { ...this.position },
+      boundingBox: { ...this.boundingBox },
+      centerPosition: { ...this.centerPosition },
     };
   }
 }

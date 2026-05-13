@@ -46,9 +46,17 @@ Use this ownership split:
 
 - `Entity`: stable id plus component map.
 - `Component`: state holder with a static `type` and `serialize()` method.
-- `System`: behavior that receives scene state and mutates components.
+- `System`: behavior that receives `ISceneState` and mutates components.
 - `EntityManager`: entity lookup, iteration, and serialization.
 - Feature factory: repeated entity composition for players, bots, UI text, or future map pieces.
+
+Use this runtime contract:
+
+- Scenes receive a direct ordered systems array.
+- Enabled systems update in array order.
+- Disabled systems do not update, but still receive init and destroy hooks.
+- Entity add/remove operations go through `EntityManager`, not `Scene` helpers.
+- Systems access entities through `sceneState.entityManager`.
 
 ## Example
 
@@ -68,6 +76,7 @@ Use this ownership split:
 3. Keep browser APIs out of systems.
 4. Keep Pac-Man-specific behavior out of `src/packages/game-engine`.
 5. Make serialized component output explicit and stable for the client.
+6. Disable a system when it should skip frame updates without skipping setup or cleanup.
 
 ## Anti-Patterns
 
@@ -75,3 +84,4 @@ Use this ownership split:
 - Do not make the generic engine import from `src/app/pacman`.
 - Do not add one-off entity subclasses when component composition is enough.
 - Do not mutate another layer through hidden globals when scene state provides the necessary managers and queues.
+- Do not add parallel entity mutation paths on `Scene` while `EntityManager` is the canonical owner.

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Scene, type ISceneConstructor } from '@game-engine/core/scene';
 import { Queue } from '@shared/data-structures/queue';
 import { EntityManager } from '@game-engine/managers/entity.manager';
@@ -46,6 +46,10 @@ const makeSut = (params?: Partial<ISceneConstructor>): ISut => {
 };
 
 describe('Core - Scene', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should initialize systems with complete scene state', () => {
     const init = vi.fn();
     const system = makeSystem({ init });
@@ -76,6 +80,111 @@ describe('Core - Scene', () => {
       eventQueue,
       entityManager,
     });
+  });
+
+  it('should update enabled systems in the provided order', () => {
+    const updateOrder: string[] = [];
+    const firstSystem = makeSystem({
+      id: 'first-system',
+      update: () => updateOrder.push('first-system'),
+    });
+    const secondSystem = makeSystem({
+      id: 'second-system',
+      update: () => updateOrder.push('second-system'),
+    });
+    const { sut, eventQueue } = makeSut({ systems: [firstSystem, secondSystem] });
+
+    sut.update({ eventMap: {}, eventQueue });
+
+    expect(updateOrder).toEqual(['first-system', 'second-system']);
+  });
+
+  it('should not update disabled systems', () => {
+    const enabledUpdate = vi.fn();
+    const disabledUpdate = vi.fn();
+    const enabledSystem = makeSystem({
+      id: 'enabled-system',
+      update: enabledUpdate,
+    });
+    const disabledSystem = makeSystem({
+      id: 'disabled-system',
+      enabled: false,
+      update: disabledUpdate,
+    });
+    const { sut, eventQueue } = makeSut({ systems: [enabledSystem, disabledSystem] });
+
+    sut.update({ eventMap: {}, eventQueue });
+
+    expect(enabledUpdate).toHaveBeenCalledOnce();
+    expect(disabledUpdate).not.toHaveBeenCalled();
+  });
+
+  it('should still initialize and destroy disabled systems', () => {
+    const init = vi.fn();
+    const destroy = vi.fn();
+    const disabledSystem = makeSystem({
+      enabled: false,
+      init,
+      destroy,
+    });
+    const { sut } = makeSut({ systems: [disabledSystem] });
+
+    sut.init();
+    sut.destroy();
+
+    expect(init).toHaveBeenCalledOnce();
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
+  it('should deliver the same event map to systems', () => {
+    const update = vi.fn();
+    const system = makeSystem({ update });
+    const { sut, eventQueue } = makeSut({ systems: [system] });
+    const eventMap = {
+      TestEvent: [{ type: 'TestEvent', value: 1 }],
+    };
+
+    sut.update({ eventMap, eventQueue });
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventMap,
+      }),
+    );
+  });
+
+  it('should use zero elapsed time on the first update', () => {
+    vi.spyOn(performance, 'now').mockReturnValue(100);
+
+    const update = vi.fn();
+    const system = makeSystem({ update });
+    const { sut, eventQueue } = makeSut({ systems: [system] });
+
+    sut.update({ eventMap: {}, eventQueue });
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        elapsed: 0,
+      }),
+    );
+  });
+
+  it('should use the elapsed time between updates after the first update', () => {
+    vi.spyOn(performance, 'now').mockReturnValueOnce(100).mockReturnValueOnce(125);
+
+    const update = vi.fn();
+    const system = makeSystem({ update });
+    const { sut, eventQueue } = makeSut({ systems: [system] });
+
+    sut.update({ eventMap: {}, eventQueue });
+    sut.update({ eventMap: {}, eventQueue });
+
+    expect(update).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        elapsed: 25,
+      }),
+    );
   });
 
   it('should destroy systems with complete scene state and clear entities', () => {
@@ -118,5 +227,21 @@ describe('Core - Scene', () => {
       viewport: { width: 50, height: 60 },
       entities: [entity.serialize()],
     });
+  });
+
+  it('should serialize cloned scene metadata', () => {
+    const size = { width: 100, height: 200 };
+    const viewport = { width: 50, height: 60 };
+    const { sut } = makeSut({ size, viewport });
+
+    const serialized = sut.serialize();
+
+    size.width = 999;
+    viewport.height = 888;
+
+    expect(serialized.size).toEqual({ width: 100, height: 200 });
+    expect(serialized.viewport).toEqual({ width: 50, height: 60 });
+    expect(serialized.size).not.toBe(size);
+    expect(serialized.viewport).not.toBe(viewport);
   });
 });
