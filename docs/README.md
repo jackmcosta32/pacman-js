@@ -28,6 +28,10 @@ This directory documents the Pac-Man game application, the lightweight game engi
 
 - [Source path alias pattern](./patterns/shared/source-path-alias-pattern.md)
 
+## Roadmap
+
+- [Pac-Man game engine roadmap](./roadmap/pacman-game-engine-roadmap.md)
+
 ## Issues
 
 - [Issue documentation index](./issues/README.md)
