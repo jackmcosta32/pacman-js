@@ -51,6 +51,8 @@ Use these boundaries while completing the project:
 
 ## Milestone 0: Restore A Clean Baseline
 
+Detailed tracking document: [Milestone 0: Restore A Clean Baseline](./milestone-0-clean-baseline.md)
+
 ### Goal
 
 Make the project compile and make the test suite describe the current architecture accurately.
@@ -79,6 +81,8 @@ Make the project compile and make the test suite describe the current architectu
 - Tests assert current architecture rather than older constructor and scene APIs.
 
 ## Milestone 1: Stabilize Engine Runtime Contracts
+
+Detailed tracking document: [Milestone 1: Stabilize Engine Runtime Contracts](./milestone-1-engine-runtime-contracts.md)
 
 ### Goal
 
@@ -112,6 +116,8 @@ Make the reusable engine reliable enough to support real gameplay systems.
 
 ## Milestone 2: Finish Client Runtime
 
+Detailed tracking document: [Milestone 2: Finish Client Runtime](./milestone-2-client-runtime.md)
+
 ### Goal
 
 Make the browser client dependable for a canvas game loop.
@@ -136,6 +142,8 @@ Make the browser client dependable for a canvas game loop.
 - Input buffering behavior is documented and tested.
 
 ## Milestone 3: Build The Pac-Man Level Model
+
+Detailed tracking document: [Milestone 3: Build The Pac-Man Level Model](./milestone-3-pacman-level-model.md)
 
 ### Goal
 
@@ -165,6 +173,8 @@ Represent a real Pac-Man maze as data that can generate renderable and collidabl
 - Walls and collectible items are represented consistently.
 
 ## Milestone 4: Implement Movement And Collision
+
+Detailed tracking document: [Milestone 4: Implement Movement And Collision](./milestone-4-movement-and-collision.md)
 
 ### Goal
 
@@ -196,6 +206,8 @@ Make player movement feel like Pac-Man and prevent invalid movement through wall
 
 ## Milestone 5: Add Core Pac-Man Rules
 
+Detailed tracking document: [Milestone 5: Add Core Pac-Man Rules](./milestone-5-core-pacman-rules.md)
+
 ### Goal
 
 Turn the prototype into a playable game loop with scoring, lives, collectibles, and round state.
@@ -220,6 +232,8 @@ Turn the prototype into a playable game loop with scoring, lives, collectibles, 
 - Game state transitions are explicit and testable.
 
 ## Milestone 6: Add Ghost Behavior
+
+Detailed tracking document: [Milestone 6: Add Ghost Behavior](./milestone-6-ghost-behavior.md)
 
 ### Goal
 
@@ -249,6 +263,8 @@ Implement ghost actors with recognizable Pac-Man behavior while keeping AI isola
 
 ## Milestone 7: Scene Flow And Menus
 
+Detailed tracking document: [Milestone 7: Scene Flow And Menus](./milestone-7-scene-flow-and-menus.md)
+
 ### Goal
 
 Make the game feel complete around the match runtime.
@@ -269,6 +285,8 @@ Make the game feel complete around the match runtime.
 - Restarting a game produces a clean match state.
 
 ## Milestone 8: Polish, Tooling, And Maintainability
+
+Detailed tracking document: [Milestone 8: Polish, Tooling, And Maintainability](./milestone-8-polish-tooling-maintainability.md)
 
 ### Goal
 
