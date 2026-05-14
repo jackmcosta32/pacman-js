@@ -13,15 +13,23 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
 body {
+  display: flex;
+  height: 100%;
+}
+
+body {
+  flex: 1;
   margin: 0;
   display: flex;
-  place-content: center;
   max-height: 100vh;
+  align-items: center;
+  place-content: center;
+  justify-content: center;
 }
 
 canvas {
-  border: solid blue;
   user-select: none;
   touch-action: none;
   width: 100%;
