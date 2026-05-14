@@ -46,6 +46,7 @@ The game engine module provides reusable runtime primitives for entity-component
 
 - Engine code should stay free of browser APIs and Pac-Man-specific behavior.
 - Components expose a static `type` and serialize their own public render or state data.
+- UI text may be updated through `UIComponent.updateInnerText()` when a feature-level system derives HUD text from authoritative state.
 - Systems should operate through scene state and entity components rather than owning feature-specific global state.
 - The serialized scene is a stable snapshot consumed by browser rendering code.
 - Generic collision and render abstraction components are deferred until gameplay or rendering needs make their payloads concrete.

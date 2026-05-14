@@ -20,4 +20,6 @@ export const INPUT_SCHEME = {
   DOWN: 'ArrowDown',
   LEFT: 'ArrowLeft',
   RIGHT: 'ArrowRight',
+  PAUSE: 'KeyP',
+  RESTART: 'KeyR',
 };

@@ -8,7 +8,7 @@ import type { IInputEvent } from '@shared/interfaces/event.interface';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
-import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
+import type { IAssetsDriver, IAudioDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
 import { PACMAN_ACTOR_DIRECTION } from '@pacman/constants/pacman-actor.constant';
 
 const makeDeferred = <Value>() => {
@@ -71,6 +71,11 @@ const makeAssetsDriver = () =>
     loadFontFace: vi.fn(() => Promise.resolve(true)),
   }) as unknown as IAssetsDriver;
 
+const makeAudioDriver = () =>
+  ({
+    play: vi.fn(),
+  }) as unknown as IAudioDriver;
+
 const makeGraphicsDriver = () =>
   ({
     clear: vi.fn(),
@@ -97,7 +102,7 @@ describe('Pac-Man - PacmanGameClient', () => {
 
     vi.mocked(assetsDriver.loadSpriteSheet).mockReturnValue(spriteLoad.promise);
 
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
     const firstStart = sut.start();
     const secondStart = sut.start();
 
@@ -117,7 +122,7 @@ describe('Pac-Man - PacmanGameClient', () => {
 
     vi.mocked(assetsDriver.loadSpriteSheet).mockReturnValue(spriteLoad.promise);
 
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
     const start = sut.start();
 
     sut.stop();
@@ -141,7 +146,7 @@ describe('Pac-Man - PacmanGameClient', () => {
 
     vi.mocked(assetsDriver.loadSpriteSheet).mockReturnValue(spriteLoad.promise);
 
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
     const start = sut.start();
 
     sut.stop();
@@ -157,7 +162,7 @@ describe('Pac-Man - PacmanGameClient', () => {
     const inputDriver = makeInputDriver();
     const assetsDriver = makeAssetsDriver();
     const graphicsDriver = makeGraphicsDriver();
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
 
     await sut.start();
     sut.stop();
@@ -176,7 +181,7 @@ describe('Pac-Man - PacmanGameClient', () => {
     const inputDriver = makeInputDriver();
     const assetsDriver = makeAssetsDriver();
     const graphicsDriver = makeGraphicsDriver();
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
 
     await sut.start();
     sut.stop();
@@ -197,7 +202,7 @@ describe('Pac-Man - PacmanGameClient', () => {
     ]);
     const assetsDriver = makeAssetsDriver();
     const graphicsDriver = makeGraphicsDriver();
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
 
     await sut.start();
 
@@ -209,6 +214,34 @@ describe('Pac-Man - PacmanGameClient', () => {
     expect(game.update).toHaveBeenCalledTimes(1);
   });
 
+  it('should map pause and restart keys to Pac-Man events', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver([
+      { type: KEYBOARD_EVENT_TYPE.KEY_DOWN, keyCode: INPUT_SCHEME.PAUSE },
+      { type: KEYBOARD_EVENT_TYPE.KEY_DOWN, keyCode: INPUT_SCHEME.RESTART },
+    ]);
+    const assetsDriver = makeAssetsDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const sut = new PacmanGameClient({
+      assetsDriver,
+      audioDriver: makeAudioDriver(),
+      game,
+      graphicsDriver,
+      inputDriver,
+    });
+
+    await sut.start();
+
+    expect(game.readClientEvent).toHaveBeenNthCalledWith(1, {
+      type: PACMAN_EVENT_TYPE.PAUSE_TOGGLE,
+    });
+    expect(game.readClientEvent).toHaveBeenNthCalledWith(2, {
+      type: PACMAN_EVENT_TYPE.RESTART_REQUEST,
+    });
+  });
+
   it('should ignore unmapped input events', async () => {
     installAnimationFrameMock();
 
@@ -216,7 +249,7 @@ describe('Pac-Man - PacmanGameClient', () => {
     const inputDriver = makeInputDriver([{ type: KEYBOARD_EVENT_TYPE.KEY_DOWN, keyCode: 'KeyA' }]);
     const assetsDriver = makeAssetsDriver();
     const graphicsDriver = makeGraphicsDriver();
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
 
     await sut.start();
 
@@ -231,7 +264,7 @@ describe('Pac-Man - PacmanGameClient', () => {
     const inputDriver = makeInputDriver();
     const assetsDriver = makeAssetsDriver();
     const graphicsDriver = makeGraphicsDriver();
-    const sut = new PacmanGameClient({ assetsDriver, game, graphicsDriver, inputDriver });
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver: makeAudioDriver(), game, graphicsDriver, inputDriver });
 
     await sut.start();
 
@@ -309,5 +342,131 @@ describe('Pac-Man - PacmanGameClient', () => {
     expect(vi.mocked(graphicsDriver.drawCircle).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(graphicsDriver.drawSprite).mock.invocationCallOrder[0],
     );
+  });
+
+  it('should load audio assets and play serialized sound hooks once', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver();
+    const assetsDriver = makeAssetsDriver();
+    const audioDriver = makeAudioDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver, game, graphicsDriver, inputDriver });
+
+    await sut.start();
+
+    const sceneListener = vi.mocked(game.subscribe).mock.calls[0][0];
+    const scene = {
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'state',
+          components: {
+            [PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT,
+              score: 0,
+              lives: 3,
+              status: 'playing',
+              remainingCollectibles: 1,
+              frightenedRemainingMs: 0,
+              respawnRemainingMs: 0,
+              soundHooks: [
+                { id: 1, soundEffect: 'start' },
+                { id: 2, soundEffect: 'pellet' },
+              ],
+            },
+          },
+        },
+      ],
+    };
+
+    sceneListener(scene);
+    sceneListener(scene);
+    sceneListener({
+      ...scene,
+      entities: [
+        {
+          ...scene.entities[0],
+          components: {
+            [PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT]: {
+              ...scene.entities[0].components[PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT],
+              soundHooks: [{ id: 3, soundEffect: 'death' }],
+            },
+          },
+        },
+      ],
+    });
+
+    expect(assetsDriver.loadAudio).toHaveBeenCalledTimes(4);
+    expect(audioDriver.play).toHaveBeenCalledTimes(3);
+    expect(audioDriver.play).toHaveBeenNthCalledWith(1, 'start');
+    expect(audioDriver.play).toHaveBeenNthCalledWith(2, 'pellet');
+    expect(audioDriver.play).toHaveBeenNthCalledWith(3, 'death');
+  });
+
+  it('should replay sound hooks when serialized hook ids roll back after an external restart', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver();
+    const assetsDriver = makeAssetsDriver();
+    const audioDriver = makeAudioDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const sut = new PacmanGameClient({ assetsDriver, audioDriver, game, graphicsDriver, inputDriver });
+
+    await sut.start();
+
+    const sceneListener = vi.mocked(game.subscribe).mock.calls[0][0];
+
+    sceneListener({
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'state',
+          components: {
+            [PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT,
+              score: 0,
+              lives: 3,
+              status: 'playing',
+              remainingCollectibles: 1,
+              frightenedRemainingMs: 0,
+              respawnRemainingMs: 0,
+              soundHooks: [{ id: 4, soundEffect: 'death' }],
+            },
+          },
+        },
+      ],
+    });
+    sceneListener({
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'state',
+          components: {
+            [PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT,
+              score: 0,
+              lives: 3,
+              status: 'playing',
+              remainingCollectibles: 1,
+              frightenedRemainingMs: 0,
+              respawnRemainingMs: 0,
+              soundHooks: [{ id: 1, soundEffect: 'start' }],
+            },
+          },
+        },
+      ],
+    });
+
+    expect(audioDriver.play).toHaveBeenNthCalledWith(1, 'death');
+    expect(audioDriver.play).toHaveBeenNthCalledWith(2, 'start');
   });
 });

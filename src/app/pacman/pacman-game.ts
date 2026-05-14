@@ -2,6 +2,7 @@ import groupBy from 'lodash/groupBy';
 import { Observer } from '@shared/patterns/observer';
 import { Queue } from '@shared/data-structures/queue';
 import { PACMAN_SCENE } from '@pacman/constants/pacman-scene.constant';
+import { PACMAN_EVENT_TYPE } from '@pacman/constants/pacman-event.constant';
 import { createPacmanGameScene } from '@pacman/scenes/pacman-game.scene';
 import type { Callback } from '@shared/types/util.type';
 import type { IGame } from '@shared/interfaces/game.interface';
@@ -49,6 +50,20 @@ export class PacmanGame extends Observer<Callback<ISerializedScene>> implements 
     }
 
     const events = this.eventQueue.drain();
+
+    if (events.some((event) => event.type === PACMAN_EVENT_TYPE.RESTART_REQUEST)) {
+      this.currentScene.destroy();
+      this.loadScene(PACMAN_SCENE.CLASSIC_MATCH);
+
+      if (!this.currentScene) {
+        throw new Error('Scene not initialized');
+      }
+
+      this.currentScene.init();
+      this.notify(this.currentScene.serialize());
+
+      return;
+    }
 
     this.currentScene.update({
       eventQueue: this.eventQueue,

@@ -21,7 +21,7 @@ export class UIComponent extends Component {
   public static readonly type = COMPONENT_TYPE.UI_COMPONENT;
 
   private readonly color?: string;
-  public readonly innerText?: string;
+  public innerText?: string;
   private readonly fontSize?: number;
   private readonly fontFamily?: string;
   private readonly textAlign?: CanvasTextAlign;
@@ -38,6 +38,10 @@ export class UIComponent extends Component {
     this.fontFamily = params?.fontFamily;
     this.textBaseline = params?.textBaseline;
     this.textRendering = params?.textRendering;
+  }
+
+  public updateInnerText(innerText: string): void {
+    this.innerText = innerText;
   }
 
   public serialize(): ISerializedUIComponent {

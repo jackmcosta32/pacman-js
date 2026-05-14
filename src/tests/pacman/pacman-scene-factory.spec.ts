@@ -9,6 +9,7 @@ import type { IEvent } from '@shared/interfaces/event.interface';
 import { parsePacmanLevel } from '@pacman/levels/pacman-level.parser';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import { PACMAN_TILE_TYPE } from '@pacman/constants/pacman-level.constant';
+import { PACMAN_ROLE, PACMAN_ROUND_STATUS } from '@pacman/constants/pacman-game-state.constant';
 
 const makeEventQueue = () => new Queue<IEvent>({ maxLength: 10 });
 
@@ -38,6 +39,10 @@ describe('Pac-Man - Scene factories', () => {
       (entity) => entity.components[PACMAN_COMPONENT_TYPE.COLLECTIBLE_COMPONENT],
     );
     const playerEntity = serializedScene.entities.find((entity) => entity.components[COMPONENT_TYPE.CONTROL_COMPONENT]);
+    const gameStateEntity = serializedScene.entities.find(
+      (entity) => entity.components[PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT],
+    );
+    const hudEntities = serializedScene.entities.filter((entity) => entity.components[PACMAN_COMPONENT_TYPE.HUD_COMPONENT]);
     const botEntity = serializedScene.entities.find(
       (entity) => entity.components[COMPONENT_TYPE.SPRITE_COMPONENT] && !entity.components[COMPONENT_TYPE.CONTROL_COMPONENT],
     );
@@ -48,6 +53,15 @@ describe('Pac-Man - Scene factories', () => {
     expect(collectibleEntities.length).toBe(
       level.getTilesByType(PACMAN_TILE_TYPE.PELLET).length + level.getTilesByType(PACMAN_TILE_TYPE.POWER_PELLET).length,
     );
+    expect(gameStateEntity?.components[PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT]).toMatchObject({
+      score: 0,
+      lives: 3,
+      status: PACMAN_ROUND_STATUS.PLAYING,
+      remainingCollectibles: collectibleEntities.length,
+    });
+    expect(hudEntities).toHaveLength(3);
+    expect(playerEntity?.components[PACMAN_COMPONENT_TYPE.ROLE_COMPONENT]?.role).toBe(PACMAN_ROLE.PLAYER);
+    expect(botEntity?.components[PACMAN_COMPONENT_TYPE.ROLE_COMPONENT]?.role).toBe(PACMAN_ROLE.GHOST);
     expect(playerEntity?.components[PACMAN_COMPONENT_TYPE.ACTOR_COMPONENT]?.speed).toBe(PLAYER_SPEED);
     expect(playerEntity?.components[COMPONENT_TYPE.POSITION_COMPONENT]?.position).toEqual(level.playerSpawn.position);
     expect(botEntity?.components[COMPONENT_TYPE.POSITION_COMPONENT]?.position).toEqual(level.ghostSpawns[0].position);

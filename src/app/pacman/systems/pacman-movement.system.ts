@@ -11,6 +11,7 @@ import type { IPacmanMovementRequestEvent } from '@pacman/interfaces/pacman-even
 import { PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 import type { IPacmanActorDirection } from '@pacman/interfaces/pacman-actor.interface';
 import type { IPacmanParsedLevel, IPacmanTile } from '@pacman/interfaces/pacman-level.interface';
+import { getPacmanGameState } from '@pacman/utils/pacman-entity.util';
 import {
   canExitTunnel,
   getActorTile,
@@ -48,6 +49,10 @@ export class PacmanMovementSystem extends System {
   }
 
   public update(sceneState: ISceneState) {
+    const gameStateComponent = getPacmanGameState(sceneState.entityManager);
+
+    if (gameStateComponent && !gameStateComponent.isPlaying) return;
+
     const movementRequest = this.getLatestMovementRequest(sceneState);
 
     sceneState.entityManager.getEntities().forEach((entity) => {

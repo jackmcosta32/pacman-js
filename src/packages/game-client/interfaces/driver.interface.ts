@@ -27,3 +27,7 @@ export interface IGraphicsDriver {
   drawSprite(sprite: ISprite, position: ICoordinate): void;
   drawText(text: string, position: ICoordinate, options?: Partial<ITypographyOptions>): void;
 }
+
+export interface IAudioDriver {
+  play(assetId: string): void;
+}

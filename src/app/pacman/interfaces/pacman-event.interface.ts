@@ -16,4 +16,16 @@ export interface IPacmanMovementRequestEvent extends IEvent {
   direction: IPacmanActorDirection;
 }
 
-export type IPacmanEvent = IPacmanMovementEvent | IPacmanMovementRequestEvent;
+export interface IPacmanPauseToggleEvent extends IEvent {
+  type: typeof PACMAN_EVENT_TYPE.PAUSE_TOGGLE;
+}
+
+export interface IPacmanRestartRequestEvent extends IEvent {
+  type: typeof PACMAN_EVENT_TYPE.RESTART_REQUEST;
+}
+
+export type IPacmanEvent =
+  | IPacmanMovementEvent
+  | IPacmanMovementRequestEvent
+  | IPacmanPauseToggleEvent
+  | IPacmanRestartRequestEvent;

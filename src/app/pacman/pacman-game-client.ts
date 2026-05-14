@@ -3,7 +3,7 @@ import { PACMAN_EVENT_TYPE } from './constants/pacman-event.constant';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
-import { ACTOR_SPRITES, MENU_FONT } from '@pacman/config/pacman-asset.config';
+import { ACTOR_SPRITES, MENU_FONT, PACMAN_SOUND_ASSETS } from '@pacman/config/pacman-asset.config';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
 import type { ISerializedUIComponent } from '@game-engine/components/ui.component';
@@ -16,12 +16,14 @@ import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pac
 import { PACMAN_ACTOR_DIRECTION } from './constants/pacman-actor.constant';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import type { ISerializedPacmanTileComponent } from '@pacman/components/pacman-tile.component';
-import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
+import type { IAssetsDriver, IAudioDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
 import type { ISerializedPacmanCollectibleComponent } from '@pacman/components/pacman-collectible.component';
+import type { ISerializedPacmanGameStateComponent } from '@pacman/components/pacman-game-state.component';
 
 export interface IPacmanGameClientConstructor {
   game: IGame;
   inputDriver: IInputDriver;
+  audioDriver: IAudioDriver;
   assetsDriver: IAssetsDriver;
   graphicsDriver: IGraphicsDriver;
 }
@@ -30,9 +32,11 @@ export class PacmanGameClient implements IGameClient {
   private readonly game: IGame;
   private currentSceneId?: string;
   private readonly inputDriver: IInputDriver;
+  private readonly audioDriver: IAudioDriver;
   private readonly assetsDriver: IAssetsDriver;
   private readonly graphicsDriver: IGraphicsDriver;
   private lastTimestamp = performance.now();
+  private lastPlayedSoundHookId = 0;
   private lifecycleToken = 0;
   private isRunning = false;
   private isSubscribed = false;
@@ -43,6 +47,7 @@ export class PacmanGameClient implements IGameClient {
   constructor(params: IPacmanGameClientConstructor) {
     this.game = params.game;
     this.inputDriver = params.inputDriver;
+    this.audioDriver = params.audioDriver;
     this.assetsDriver = params.assetsDriver;
     this.graphicsDriver = params.graphicsDriver;
   }
@@ -62,6 +67,29 @@ export class PacmanGameClient implements IGameClient {
     scene.entities.forEach((entity) => this.drawWallEntity(entity));
     scene.entities.forEach((entity) => this.drawCollectibleEntity(entity));
     scene.entities.forEach((entity) => this.drawSpriteOrTextEntity(entity));
+    scene.entities.forEach((entity) => this.playSoundHooks(entity));
+  }
+
+  private playSoundHooks(entity: ISerializedEntity): void {
+    const gameStateComponent = entity.components[
+      PACMAN_COMPONENT_TYPE.GAME_STATE_COMPONENT
+    ] as ISerializedPacmanGameStateComponent;
+
+    if (!gameStateComponent) return;
+
+    const sortedSoundHooks = [...gameStateComponent.soundHooks].sort((left, right) => left.id - right.id);
+    const latestSoundHook = sortedSoundHooks[sortedSoundHooks.length - 1];
+
+    if (latestSoundHook && latestSoundHook.id < this.lastPlayedSoundHookId) {
+      this.lastPlayedSoundHookId = 0;
+    }
+
+    sortedSoundHooks.forEach((soundHook) => {
+      if (soundHook.id <= this.lastPlayedSoundHookId) return;
+
+      this.audioDriver.play(soundHook.soundEffect);
+      this.lastPlayedSoundHookId = soundHook.id;
+    });
   }
 
   private drawWallEntity(entity: ISerializedEntity): void {
@@ -138,6 +166,14 @@ export class PacmanGameClient implements IGameClient {
             type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
             direction: PACMAN_ACTOR_DIRECTION.RIGHT,
           } as IPacmanMovementRequestEvent;
+        case INPUT_SCHEME.PAUSE:
+          return {
+            type: PACMAN_EVENT_TYPE.PAUSE_TOGGLE,
+          };
+        case INPUT_SCHEME.RESTART:
+          return {
+            type: PACMAN_EVENT_TYPE.RESTART_REQUEST,
+          };
       }
     }
   }
@@ -161,6 +197,10 @@ export class PacmanGameClient implements IGameClient {
       const pacmanEvent = this.mapInputEvent(inputEvent);
 
       if (pacmanEvent) {
+        if (pacmanEvent.type === PACMAN_EVENT_TYPE.RESTART_REQUEST) {
+          this.lastPlayedSoundHookId = 0;
+        }
+
         this.game.readClientEvent(pacmanEvent);
       }
     });
@@ -203,6 +243,7 @@ export class PacmanGameClient implements IGameClient {
 
     this.pendingStart = undefined;
     this.currentSceneId = undefined;
+    this.lastPlayedSoundHookId = 0;
     this.lastTimestamp = performance.now();
   }
 
@@ -213,6 +254,7 @@ export class PacmanGameClient implements IGameClient {
       await Promise.all([
         this.assetsDriver.loadSpriteSheet(ACTOR_SPRITES),
         this.assetsDriver.loadFontFace(MENU_FONT.id, MENU_FONT),
+        ...Object.values(PACMAN_SOUND_ASSETS).map((asset) => this.assetsDriver.loadAudio(asset)),
       ]);
 
       if (startToken !== this.lifecycleToken) return;
