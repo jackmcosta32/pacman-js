@@ -9,7 +9,7 @@ import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
-import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
+import { PACMAN_ACTOR_DIRECTION } from '@pacman/constants/pacman-actor.constant';
 
 const makeDeferred = <Value>() => {
   let resolve!: (value: Value) => void;
@@ -202,15 +202,10 @@ describe('Pac-Man - PacmanGameClient', () => {
     await sut.start();
 
     expect(game.readClientEvent).toHaveBeenNthCalledWith(1, {
-      type: PACMAN_EVENT_TYPE.MOVEMENT,
+      type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
       direction: PACMAN_ACTOR_DIRECTION.LEFT,
-      movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
     });
-    expect(game.readClientEvent).toHaveBeenNthCalledWith(2, {
-      type: PACMAN_EVENT_TYPE.MOVEMENT,
-      direction: PACMAN_ACTOR_DIRECTION.LEFT,
-      movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
-    });
+    expect(game.readClientEvent).toHaveBeenCalledTimes(1);
     expect(game.update).toHaveBeenCalledTimes(1);
   });
 

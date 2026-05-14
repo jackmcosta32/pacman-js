@@ -11,4 +11,9 @@ export interface IPacmanMovementEvent extends IEvent {
   movementState: IPacmanActorMovementState;
 }
 
-export type IPacmanEvent = IPacmanMovementEvent;
+export interface IPacmanMovementRequestEvent extends IEvent {
+  type: typeof PACMAN_EVENT_TYPE.MOVEMENT_REQUEST;
+  direction: IPacmanActorDirection;
+}
+
+export type IPacmanEvent = IPacmanMovementEvent | IPacmanMovementRequestEvent;

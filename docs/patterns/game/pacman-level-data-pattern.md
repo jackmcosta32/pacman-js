@@ -11,6 +11,7 @@ This guide documents how Pac-Man maze data is represented, parsed, queried, and 
 - Keep tile parsing and tile collision queries Pac-Man-specific until a generic tile engine is needed.
 - Treat parsed tile-map queries as the authoritative static collision source.
 - Generate render/metadata entities from level data instead of manually positioning static maze objects.
+- Use tunnel tile pairing from parsed level data for movement wrapping.
 
 ## Why This Rule Exists
 
@@ -48,6 +49,10 @@ Use these symbols in level rows:
 
 Tile world positions use top-left coordinates: `{ x: column * tileSize, y: row * tileSize }`.
 
+Movement uses actor centers for tile alignment and tile queries for static collision. Wall entities are render/metadata output from the level model, not the source for movement blocking.
+
+Tunnel wrapping is valid only when an actor crosses the level boundary from a tunnel tile that has a paired exit. The wrapped position should align the actor center to the paired tunnel tile center before scene serialization.
+
 ## Checklist
 
 1. Keep every row the same length.
@@ -56,6 +61,7 @@ Tile world positions use top-left coordinates: `{ x: column * tileSize, y: row *
 4. Include at least one ghost spawn and one ghost-house tile.
 5. Use either zero tunnel tiles or exactly two tunnel tiles.
 6. Add tests for parser validation and query behavior when changing map data.
+7. Keep movement collision backed by parsed level queries instead of duplicating wall state in a physics index.
 
 ## Anti-Patterns
 
@@ -63,3 +69,4 @@ Tile world positions use top-left coordinates: `{ x: column * tileSize, y: row *
 - Do not infer collision authority from wall render entities.
 - Do not add browser drawing logic to level parsers, components, or systems.
 - Do not manually hard-code actor positions when the level defines spawn tiles.
+- Do not emit collision events for wall blocking unless another system needs a defined collision payload.

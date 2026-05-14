@@ -11,9 +11,9 @@ import type { ISerializedEntity } from '@game-engine/interfaces/entity.interface
 import { SECONDS_PER_FRAME, INPUT_SCHEME } from '@pacman/config/pacman-game.config';
 import type { ISerializedSpriteComponent } from '@game-engine/components/sprite.component';
 import type { ISerializedPositionComponent } from '@game-engine/components/position.component';
-import type { IPacmanEvent, IPacmanMovementEvent } from '@pacman/interfaces/pacman-event.interface';
+import type { IPacmanEvent, IPacmanMovementRequestEvent } from '@pacman/interfaces/pacman-event.interface';
 import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
-import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from './constants/pacman-actor.constant';
+import { PACMAN_ACTOR_DIRECTION } from './constants/pacman-actor.constant';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import type { ISerializedPacmanTileComponent } from '@pacman/components/pacman-tile.component';
 import type { IAssetsDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
@@ -120,57 +120,24 @@ export class PacmanGameClient implements IGameClient {
       switch (input.keyCode) {
         case INPUT_SCHEME.UP:
           return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
+            type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
             direction: PACMAN_ACTOR_DIRECTION.UP,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
-          } as IPacmanMovementEvent;
+          } as IPacmanMovementRequestEvent;
         case INPUT_SCHEME.DOWN:
           return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
+            type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
             direction: PACMAN_ACTOR_DIRECTION.DOWN,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
-          } as IPacmanMovementEvent;
+          } as IPacmanMovementRequestEvent;
         case INPUT_SCHEME.LEFT:
           return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
+            type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
             direction: PACMAN_ACTOR_DIRECTION.LEFT,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
-          } as IPacmanMovementEvent;
+          } as IPacmanMovementRequestEvent;
         case INPUT_SCHEME.RIGHT:
           return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
+            type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST,
             direction: PACMAN_ACTOR_DIRECTION.RIGHT,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
-          } as IPacmanMovementEvent;
-      }
-    }
-
-    if (input.type === KEYBOARD_EVENT_TYPE.KEY_UP) {
-      switch (input.keyCode) {
-        case INPUT_SCHEME.UP:
-          return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
-            direction: PACMAN_ACTOR_DIRECTION.UP,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
-          } as IPacmanMovementEvent;
-        case INPUT_SCHEME.DOWN:
-          return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
-            direction: PACMAN_ACTOR_DIRECTION.DOWN,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
-          } as IPacmanMovementEvent;
-        case INPUT_SCHEME.LEFT:
-          return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
-            direction: PACMAN_ACTOR_DIRECTION.LEFT,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
-          } as IPacmanMovementEvent;
-        case INPUT_SCHEME.RIGHT:
-          return {
-            type: PACMAN_EVENT_TYPE.MOVEMENT,
-            direction: PACMAN_ACTOR_DIRECTION.RIGHT,
-            movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
-          } as IPacmanMovementEvent;
+          } as IPacmanMovementRequestEvent;
       }
     }
   }

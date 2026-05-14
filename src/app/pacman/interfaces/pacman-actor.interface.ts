@@ -9,3 +9,8 @@ export type IPacmanActorMovementState = Values<typeof PACMAN_ACTOR_MOVEMENT_STAT
 export type IPacmanActorSpriteMap = Partial<
   Record<IPacmanActorMovementState, Record<IPacmanActorDirection, ISpriteFrames>>
 >;
+
+export interface IPacmanActorDirectionState {
+  currentDirection: IPacmanActorDirection;
+  requestedDirection: IPacmanActorDirection;
+}

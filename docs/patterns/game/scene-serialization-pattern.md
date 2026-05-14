@@ -38,9 +38,9 @@ InputDriver
 ## Example
 
 1. The input driver buffers a keyboard event.
-2. `PacmanGameClient` maps `ArrowLeft` into a Pac-Man movement event.
+2. `PacmanGameClient` maps `ArrowLeft` into a Pac-Man movement request event.
 3. `PacmanGame` enqueues the event and drains events during `update()`.
-4. `PacmanMovementSystem` receives movement events through `sceneState.eventMap`.
+4. `PacmanMovementSystem` receives movement request events through `sceneState.eventMap`.
 5. The movement system updates `PositionComponent` and `PacmanActorComponent`.
 6. The scene serializes entity components.
 7. The graphics driver draws the serialized sprite at the serialized position.

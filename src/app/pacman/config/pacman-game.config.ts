@@ -9,6 +9,11 @@ export const CAMERA_DAMPING = 0.5;
 export const TILE_SIZE = 48;
 export const SPRITE_SIZE = 48;
 
+// Movement Settings
+export const PLAYER_SPEED = 0.1;
+export const ACTOR_CENTER_TOLERANCE = 2;
+export const ACTOR_TURN_TOLERANCE = 4;
+
 // Input Settings
 export const INPUT_SCHEME = {
   UP: 'ArrowUp',

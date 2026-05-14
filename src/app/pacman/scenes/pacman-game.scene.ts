@@ -13,16 +13,20 @@ import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/con
 import { PacmanMovementSystem } from '@pacman/systems/pacman-movement.system';
 import type { IEvent } from '@shared/interfaces/event.interface';
 import type { IQueue } from '@shared/interfaces/queue.interface';
+import { PLAYER_SPEED } from '@pacman/config/pacman-game.config';
 
 // TODO: How can I load a scene dynamically?
 export const createPacmanGameScene = (eventQueue: IQueue<IEvent>): Scene => {
   const level = parsePacmanLevel(PACMAN_CLASSIC_LEVEL);
+
   const staticEntities = PacmanLevelEntityFactory.makeStaticEntities(level);
+
   const firstGhostSpawn = level.ghostSpawns[0];
+
   const entities = [
     ...staticEntities,
     PacmanPlayerEntityFactory.make({
-      speed: 0.1,
+      speed: PLAYER_SPEED,
       animationDuration: 200,
       position: { ...level.playerSpawn.position },
       size: level.playerSpawn.size,
@@ -38,7 +42,7 @@ export const createPacmanGameScene = (eventQueue: IQueue<IEvent>): Scene => {
   ];
 
   const entityManager = new EntityManager({ entities });
-  const systems = [new PacmanAnimationSystem(), new PacmanMovementSystem()];
+  const systems = [new PacmanMovementSystem({ level }), new PacmanAnimationSystem()];
 
   return new Scene({
     systems,

@@ -18,7 +18,7 @@ export interface IPacmanPhysicsSystemConstructor {
 }
 
 export class PacmanPhysicsSystem extends System {
-  public static readonly id = PACMAN_SYSTEM.MOVEMENT;
+  public static readonly id = PACMAN_SYSTEM.PHYSICS;
 
   private readonly entityTree: QuadTree;
 

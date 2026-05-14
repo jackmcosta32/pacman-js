@@ -19,6 +19,8 @@ describe('Pac-Man - ActorComponent', () => {
       type: PACMAN_COMPONENT_TYPE.ACTOR_COMPONENT,
       speed: 0.1,
       direction: PACMAN_ACTOR_DIRECTION.LEFT,
+      currentDirection: PACMAN_ACTOR_DIRECTION.LEFT,
+      requestedDirection: PACMAN_ACTOR_DIRECTION.LEFT,
       movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
     });
   });

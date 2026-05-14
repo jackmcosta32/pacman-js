@@ -4,6 +4,7 @@ import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { createPacmanGameScene } from '@pacman/scenes/pacman-game.scene';
 import { PACMAN_CLASSIC_LEVEL } from '@pacman/levels/classic-level';
 import { createPacmanMainMenuScene } from '@pacman/scenes/pacman-main-menu.scene';
+import { PLAYER_SPEED } from '@pacman/config/pacman-game.config';
 import type { IEvent } from '@shared/interfaces/event.interface';
 import { parsePacmanLevel } from '@pacman/levels/pacman-level.parser';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
@@ -47,6 +48,7 @@ describe('Pac-Man - Scene factories', () => {
     expect(collectibleEntities.length).toBe(
       level.getTilesByType(PACMAN_TILE_TYPE.PELLET).length + level.getTilesByType(PACMAN_TILE_TYPE.POWER_PELLET).length,
     );
+    expect(playerEntity?.components[PACMAN_COMPONENT_TYPE.ACTOR_COMPONENT]?.speed).toBe(PLAYER_SPEED);
     expect(playerEntity?.components[COMPONENT_TYPE.POSITION_COMPONENT]?.position).toEqual(level.playerSpawn.position);
     expect(botEntity?.components[COMPONENT_TYPE.POSITION_COMPONENT]?.position).toEqual(level.ghostSpawns[0].position);
     expect(playerEntity?.components[COMPONENT_TYPE.POSITION_COMPONENT]?.position).not.toEqual({ x: 50, y: 50 });

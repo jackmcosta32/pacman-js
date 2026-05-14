@@ -9,11 +9,11 @@ import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.consta
 import type { ISerializedComponent } from '@game-engine/interfaces/component.interface';
 import { PACMAN_ACTOR_DIRECTION, PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
 
-// TODO: Split this component into smaller components
-
 export interface IPacmanActorComponentConstructor {
   speed: number;
   direction?: IPacmanActorDirection;
+  currentDirection?: IPacmanActorDirection;
+  requestedDirection?: IPacmanActorDirection;
   actorSpriteMap: IPacmanActorSpriteMap;
   movementState?: IPacmanActorMovementState;
 }
@@ -22,13 +22,16 @@ export interface ISerializedPacmanActorComponent extends ISerializedComponent {
   speed: number;
   movementState: string;
   direction: IPacmanActorDirection;
+  currentDirection: IPacmanActorDirection;
+  requestedDirection: IPacmanActorDirection;
 }
 
 export class PacmanActorComponent extends Component {
   public static readonly type = PACMAN_COMPONENT_TYPE.ACTOR_COMPONENT;
 
   public speed: number;
-  public direction: IPacmanActorDirection;
+  public currentDirection: IPacmanActorDirection;
+  public requestedDirection: IPacmanActorDirection;
   public movementState: IPacmanActorMovementState;
   private readonly actorSpriteMap: IPacmanActorSpriteMap;
 
@@ -37,8 +40,13 @@ export class PacmanActorComponent extends Component {
 
     this.speed = params.speed;
     this.actorSpriteMap = params.actorSpriteMap;
-    this.direction = params.direction ?? PACMAN_ACTOR_DIRECTION.DOWN;
+    this.currentDirection = params.currentDirection ?? params.direction ?? PACMAN_ACTOR_DIRECTION.DOWN;
+    this.requestedDirection = params.requestedDirection ?? this.currentDirection;
     this.movementState = params.movementState ?? PACMAN_ACTOR_MOVEMENT_STATE.IDLE;
+  }
+
+  public get direction(): IPacmanActorDirection {
+    return this.currentDirection;
   }
 
   public updateSpeed(speed: number) {
@@ -46,7 +54,15 @@ export class PacmanActorComponent extends Component {
   }
 
   public updateDirection(direction: IPacmanActorDirection) {
-    this.direction = direction;
+    this.updateCurrentDirection(direction);
+  }
+
+  public updateCurrentDirection(direction: IPacmanActorDirection) {
+    this.currentDirection = direction;
+  }
+
+  public updateRequestedDirection(direction: IPacmanActorDirection) {
+    this.requestedDirection = direction;
   }
 
   public updateMovementState(movementState: IPacmanActorMovementState) {
@@ -58,14 +74,16 @@ export class PacmanActorComponent extends Component {
 
     if (!stateSpriteFrames) return;
 
-    return stateSpriteFrames[this.direction];
+    return stateSpriteFrames[this.currentDirection];
   }
 
   public serialize(): ISerializedPacmanActorComponent {
     return {
       type: this.type,
       speed: this.speed,
-      direction: this.direction,
+      direction: this.currentDirection,
+      currentDirection: this.currentDirection,
+      requestedDirection: this.requestedDirection,
       movementState: this.movementState,
     };
   }
