@@ -91,6 +91,19 @@ export const isReverseDirection = (
   return currentVector.x + requestedVector.x === 0 && currentVector.y + requestedVector.y === 0;
 };
 
+export const getReverseDirection = (direction: IPacmanActorDirection): IPacmanActorDirection => {
+  switch (direction) {
+    case PACMAN_ACTOR_DIRECTION.UP:
+      return PACMAN_ACTOR_DIRECTION.DOWN;
+    case PACMAN_ACTOR_DIRECTION.DOWN:
+      return PACMAN_ACTOR_DIRECTION.UP;
+    case PACMAN_ACTOR_DIRECTION.LEFT:
+      return PACMAN_ACTOR_DIRECTION.RIGHT;
+    case PACMAN_ACTOR_DIRECTION.RIGHT:
+      return PACMAN_ACTOR_DIRECTION.LEFT;
+  }
+};
+
 export const isWithinTolerance = (value: number, target: number, tolerance: number): boolean => {
   return Math.abs(value - target) <= tolerance;
 };

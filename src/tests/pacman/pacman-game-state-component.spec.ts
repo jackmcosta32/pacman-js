@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
 import { PacmanHudComponent } from '@pacman/components/pacman-hud.component';
 import { PacmanRoleComponent } from '@pacman/components/pacman-role.component';
+import { PacmanGhostComponent } from '@pacman/components/pacman-ghost.component';
 import { PacmanGameStateComponent } from '@pacman/components/pacman-game-state.component';
+import { PACMAN_GHOST_ID, PACMAN_GHOST_MODE } from '@pacman/constants/pacman-ghost.constant';
 import {
   PACMAN_HUD_TYPE,
   PACMAN_ROLE,
@@ -21,6 +23,8 @@ describe('Pac-Man - Game state components', () => {
       status: PACMAN_ROUND_STATUS.PLAYING,
       remainingCollectibles: 3,
       frightenedRemainingMs: 0,
+      frightenedWindowId: 0,
+      ghostEatenStreak: 0,
       respawnRemainingMs: 0,
       soundHooks: [{ id: 1, soundEffect: PACMAN_SOUND_EFFECT.START }],
     });
@@ -53,5 +57,44 @@ describe('Pac-Man - Game state components', () => {
       type: PACMAN_COMPONENT_TYPE.HUD_COMPONENT,
       hudType: PACMAN_HUD_TYPE.SCORE,
     });
+  });
+
+  it('should serialize ghost state as a stable payload snapshot', () => {
+    const spawnTile = { row: 1, column: 2 };
+    const sut = new PacmanGhostComponent({
+      ghostId: PACMAN_GHOST_ID.BLINKY,
+      mode: PACMAN_GHOST_MODE.CHASE,
+      previousMode: PACMAN_GHOST_MODE.SCATTER,
+      spawnTile,
+      homeTile: { row: 3, column: 4 },
+      houseEntryTile: { row: 3, column: 5 },
+      houseExitTile: { row: 2, column: 5 },
+      scatterTargetTile: { row: 1, column: 10 },
+      released: true,
+      releaseDelayMs: 0,
+      releaseElapsedMs: 25,
+      frightenedWindowId: 2,
+    });
+
+    const serialized = sut.serialize();
+
+    spawnTile.row = 99;
+
+    expect(serialized).toEqual({
+      type: PACMAN_COMPONENT_TYPE.GHOST_COMPONENT,
+      ghostId: PACMAN_GHOST_ID.BLINKY,
+      mode: PACMAN_GHOST_MODE.CHASE,
+      previousMode: PACMAN_GHOST_MODE.SCATTER,
+      spawnTile: { row: 1, column: 2 },
+      homeTile: { row: 3, column: 4 },
+      houseEntryTile: { row: 3, column: 5 },
+      houseExitTile: { row: 2, column: 5 },
+      scatterTargetTile: { row: 1, column: 10 },
+      released: true,
+      releaseDelayMs: 0,
+      releaseElapsedMs: 25,
+      frightenedWindowId: 2,
+    });
+    expect(serialized.spawnTile).not.toBe(spawnTile);
   });
 });

@@ -12,6 +12,7 @@ This guide documents how Pac-Man maze data is represented, parsed, queried, and 
 - Treat parsed tile-map queries as the authoritative static collision source.
 - Generate render/metadata entities from level data instead of manually positioning static maze objects.
 - Use tunnel tile pairing from parsed level data for movement wrapping.
+- Derive ghost start slots from parsed spawn and house tiles instead of hard-coding actor positions in scenes.
 
 ## Why This Rule Exists
 
@@ -53,15 +54,18 @@ Movement uses actor centers for tile alignment and tile queries for static colli
 
 Tunnel wrapping is valid only when an actor crosses the level boundary from a tunnel tile that has a paired exit. The wrapped position should align the actor center to the paired tunnel tile center before scene serialization.
 
+Ghost start slots are deterministic parser output. The compact map can define one `G` tile plus three `H` tiles; the parser exposes those four ordered slots to the scene, along with the center house tile as the house entry and the first `G` tile as the house exit.
+
 ## Checklist
 
 1. Keep every row the same length.
 2. Do not trim rows; leading and trailing spaces are path tiles.
 3. Include exactly one player spawn.
 4. Include at least one ghost spawn and one ghost-house tile.
-5. Use either zero tunnel tiles or exactly two tunnel tiles.
-6. Add tests for parser validation and query behavior when changing map data.
-7. Keep movement collision backed by parsed level queries instead of duplicating wall state in a physics index.
+5. Add parser tests for ghost slot ordering when changing spawn or house symbols.
+6. Use either zero tunnel tiles or exactly two tunnel tiles.
+7. Add tests for parser validation and query behavior when changing map data.
+8. Keep movement collision backed by parsed level queries instead of duplicating wall state in a physics index.
 
 ## Anti-Patterns
 

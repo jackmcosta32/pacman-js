@@ -84,6 +84,10 @@ export const parsePacmanLevel = (definition: IPacmanLevelDefinition): IPacmanPar
   validateSpecialTiles(definition, playerSpawns, ghostSpawns, ghostHouseTiles, tunnelTiles);
   applyTunnelPairing(tunnelTiles);
 
+  const ghostHouseEntryTile = getCenterTile(ghostHouseTiles);
+  const ghostHouseExitTile = ghostSpawns[0];
+  const ghostStartSlots = makeGhostStartSlots(ghostSpawns, ghostHouseTiles, ghostHouseEntryTile, ghostHouseExitTile);
+
   const getTileAt = (row: number, column: number): IPacmanTile | undefined => {
     return grid[row]?.[column];
   };
@@ -100,6 +104,9 @@ export const parsePacmanLevel = (definition: IPacmanLevelDefinition): IPacmanPar
     playerSpawn: playerSpawns[0],
     ghostSpawns,
     ghostHouseTiles,
+    ghostStartSlots,
+    ghostHouseEntryTile,
+    ghostHouseExitTile,
     tunnelTiles,
     size: {
       width: width * definition.tileSize,
@@ -184,4 +191,28 @@ const applyTunnelPairing = (tunnelTiles: IPacmanTile[]): void => {
 
   firstTunnel.tunnelExit = { row: secondTunnel.row, column: secondTunnel.column };
   secondTunnel.tunnelExit = { row: firstTunnel.row, column: firstTunnel.column };
+};
+
+const getCenterTile = (tiles: IPacmanTile[]): IPacmanTile => {
+  const sortedTiles = [...tiles].sort((first, second) => first.row - second.row || first.column - second.column);
+
+  return sortedTiles[Math.floor(sortedTiles.length / 2)];
+};
+
+const makeGhostStartSlots = (
+  ghostSpawns: IPacmanTile[],
+  ghostHouseTiles: IPacmanTile[],
+  ghostHouseEntryTile: IPacmanTile,
+  ghostHouseExitTile: IPacmanTile,
+) => {
+  const sortedGhostSpawns = [...ghostSpawns].sort((first, second) => first.row - second.row || first.column - second.column);
+  const sortedHouseTiles = [...ghostHouseTiles].sort((first, second) => first.row - second.row || first.column - second.column);
+  const startTiles = [...sortedGhostSpawns, ...sortedHouseTiles];
+
+  return startTiles.map((tile) => ({
+    spawnTile: tile,
+    homeTile: tile.type === PACMAN_TILE_TYPE.GHOST_HOUSE ? tile : ghostHouseEntryTile,
+    houseEntryTile: ghostHouseEntryTile,
+    houseExitTile: ghostHouseExitTile,
+  }));
 };

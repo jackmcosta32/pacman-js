@@ -22,6 +22,7 @@ export const PACMAN_SOUND_EFFECT = {
   PELLET: 'pellet',
   POWER_PELLET: 'power-pellet',
   DEATH: 'death',
+  GHOST_EATEN: 'ghost-eaten',
 } as const;
 
 export const PACMAN_GAME_STATE_DEFAULTS = {

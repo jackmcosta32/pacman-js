@@ -130,6 +130,32 @@ describe('Pac-Man - MovementSystem', () => {
     expect(getActor(player).requestedDirection).toBe(PACMAN_ACTOR_DIRECTION.UP);
   });
 
+  it('should not apply player input events to actors without control', () => {
+    const level = parsePacmanLevel(makeDefinition());
+    const ghost = new Entity({
+      id: 'ghost',
+      components: [
+        new PositionComponent({
+          size: { width: level.tileSize, height: level.tileSize },
+          position: { ...level.ghostSpawns[0].position },
+        }),
+        new PacmanActorComponent({
+          speed: 1,
+          direction: PACMAN_ACTOR_DIRECTION.LEFT,
+          requestedDirection: PACMAN_ACTOR_DIRECTION.LEFT,
+          movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+          actorSpriteMap: {},
+        }),
+      ],
+    });
+
+    updateSystem(level, ghost, 4, [
+      { type: PACMAN_EVENT_TYPE.MOVEMENT_REQUEST, direction: PACMAN_ACTOR_DIRECTION.UP },
+    ]);
+
+    expect(getActor(ghost).requestedDirection).toBe(PACMAN_ACTOR_DIRECTION.LEFT);
+  });
+
   it('should apply a buffered turn when the actor reaches a legal centered tile', () => {
     const level = parsePacmanLevel(makeDefinition());
     const player = makePlayer(level, {

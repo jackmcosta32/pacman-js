@@ -21,6 +21,11 @@ describe('Pac-Man - Level parser', () => {
     expect(sut.playerSpawn).toMatchObject({ row: 1, column: 2, type: PACMAN_TILE_TYPE.PLAYER_SPAWN });
     expect(sut.ghostSpawns).toHaveLength(1);
     expect(sut.ghostHouseTiles).toHaveLength(1);
+    expect(sut.ghostStartSlots).toHaveLength(2);
+    expect(sut.ghostStartSlots[0].spawnTile).toMatchObject({ row: 2, column: 2, type: PACMAN_TILE_TYPE.GHOST_SPAWN });
+    expect(sut.ghostStartSlots[1].spawnTile).toMatchObject({ row: 3, column: 1, type: PACMAN_TILE_TYPE.GHOST_HOUSE });
+    expect(sut.ghostHouseEntryTile).toMatchObject({ row: 3, column: 1 });
+    expect(sut.ghostHouseExitTile).toMatchObject({ row: 2, column: 2 });
     expect(sut.tunnelTiles).toHaveLength(2);
     expect(sut.getTilesByType(PACMAN_TILE_TYPE.PELLET)).toHaveLength(1);
     expect(sut.getTilesByType(PACMAN_TILE_TYPE.POWER_PELLET)).toHaveLength(1);

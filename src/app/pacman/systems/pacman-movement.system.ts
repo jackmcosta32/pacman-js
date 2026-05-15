@@ -7,8 +7,10 @@ import { PACMAN_EVENT_TYPE } from '@pacman/constants/pacman-event.constant';
 import { ControlComponent } from '@game-engine/components/control.component';
 import { PositionComponent } from '@game-engine/components/position.component';
 import { PacmanActorComponent } from '@pacman/components/pacman-actor.component';
+import { PacmanRoleComponent } from '@pacman/components/pacman-role.component';
 import type { IPacmanMovementRequestEvent } from '@pacman/interfaces/pacman-event.interface';
 import { PACMAN_ACTOR_MOVEMENT_STATE } from '@pacman/constants/pacman-actor.constant';
+import { PACMAN_ROLE } from '@pacman/constants/pacman-game-state.constant';
 import type { IPacmanActorDirection } from '@pacman/interfaces/pacman-actor.interface';
 import type { IPacmanParsedLevel, IPacmanTile } from '@pacman/interfaces/pacman-level.interface';
 import { getPacmanGameState } from '@pacman/utils/pacman-entity.util';
@@ -56,15 +58,13 @@ export class PacmanMovementSystem extends System {
     const movementRequest = this.getLatestMovementRequest(sceneState);
 
     sceneState.entityManager.getEntities().forEach((entity) => {
-      this.updateEntityMovement(entity, sceneState.elapsed, movementRequest?.direction);
+      const requestedDirection = this.getEntityInputDirection(entity, movementRequest?.direction);
+
+      this.updateEntityMovement(entity, sceneState.elapsed, requestedDirection);
     });
   }
 
   public updateEntityMovement(entity: IEntity, elapsed: number, requestedDirection?: IPacmanActorDirection): void {
-    const controlComponent = entity.getComponent(ControlComponent);
-
-    if (!controlComponent) return;
-
     const positionComponent = entity.getComponent(PositionComponent);
     const actorComponent = entity.getComponent(PacmanActorComponent);
 
@@ -162,6 +162,20 @@ export class PacmanMovementSystem extends System {
       | undefined;
 
     return movementRequests?.[movementRequests.length - 1];
+  }
+
+  private getEntityInputDirection(
+    entity: IEntity,
+    requestedDirection?: IPacmanActorDirection,
+  ): IPacmanActorDirection | undefined {
+    if (!requestedDirection) return;
+    if (!entity.getComponent(ControlComponent)) return;
+
+    const role = entity.getComponent(PacmanRoleComponent)?.role;
+
+    if (role && role !== PACMAN_ROLE.PLAYER) return;
+
+    return requestedDirection;
   }
 
   private applyRequestedDirection(

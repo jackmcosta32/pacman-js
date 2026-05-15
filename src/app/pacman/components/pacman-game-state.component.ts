@@ -19,6 +19,8 @@ export interface IPacmanGameStateComponentConstructor {
   remainingCollectibles: number;
   respawnRemainingMs?: number;
   frightenedRemainingMs?: number;
+  frightenedWindowId?: number;
+  ghostEatenStreak?: number;
   soundHookMaxLength?: number;
 }
 
@@ -29,6 +31,8 @@ export interface ISerializedPacmanGameStateComponent extends ISerializedComponen
   remainingCollectibles: number;
   respawnRemainingMs: number;
   frightenedRemainingMs: number;
+  frightenedWindowId: number;
+  ghostEatenStreak: number;
   soundHooks: IPacmanSoundHook[];
 }
 
@@ -41,6 +45,8 @@ export class PacmanGameStateComponent extends Component {
   public remainingCollectibles: number;
   public respawnRemainingMs: number;
   public frightenedRemainingMs: number;
+  public frightenedWindowId: number;
+  public ghostEatenStreak: number;
   private nextSoundHookId = 1;
   private readonly soundHooks: IPacmanSoundHook[] = [];
   private readonly soundHookMaxLength: number;
@@ -53,6 +59,8 @@ export class PacmanGameStateComponent extends Component {
     this.status = params.status ?? PACMAN_ROUND_STATUS.PLAYING;
     this.respawnRemainingMs = params.respawnRemainingMs ?? 0;
     this.frightenedRemainingMs = params.frightenedRemainingMs ?? 0;
+    this.frightenedWindowId = params.frightenedWindowId ?? 0;
+    this.ghostEatenStreak = params.ghostEatenStreak ?? 0;
     this.remainingCollectibles = params.remainingCollectibles;
     this.soundHookMaxLength = params.soundHookMaxLength ?? PACMAN_GAME_STATE_DEFAULTS.SOUND_HOOK_MAX_LENGTH;
 
@@ -92,6 +100,8 @@ export class PacmanGameStateComponent extends Component {
 
   public startFrightenedMode(durationMs = PACMAN_GAME_STATE_DEFAULTS.FRIGHTENED_DURATION_MS): void {
     this.frightenedRemainingMs = durationMs;
+    this.frightenedWindowId += 1;
+    this.ghostEatenStreak = 0;
   }
 
   public updateFrightenedTimer(elapsed: number): void {
@@ -103,6 +113,7 @@ export class PacmanGameStateComponent extends Component {
 
     this.lives = Math.max(0, this.lives - 1);
     this.frightenedRemainingMs = 0;
+    this.ghostEatenStreak = 0;
     this.queueSound(PACMAN_SOUND_EFFECT.DEATH);
 
     if (this.lives === 0) {
@@ -139,6 +150,16 @@ export class PacmanGameStateComponent extends Component {
     }
   }
 
+  public addGhostEatenScore(scoreValues: readonly number[]): number {
+    const scoreValue = scoreValues[Math.min(this.ghostEatenStreak, scoreValues.length - 1)] ?? 0;
+
+    this.addScore(scoreValue);
+    this.ghostEatenStreak += 1;
+    this.queueSound(PACMAN_SOUND_EFFECT.GHOST_EATEN);
+
+    return scoreValue;
+  }
+
   public serialize(): ISerializedPacmanGameStateComponent {
     return {
       type: this.type,
@@ -147,6 +168,8 @@ export class PacmanGameStateComponent extends Component {
       status: this.status,
       respawnRemainingMs: this.respawnRemainingMs,
       frightenedRemainingMs: this.frightenedRemainingMs,
+      frightenedWindowId: this.frightenedWindowId,
+      ghostEatenStreak: this.ghostEatenStreak,
       remainingCollectibles: this.remainingCollectibles,
       soundHooks: this.soundHooks.map((soundHook) => ({ ...soundHook })),
     };

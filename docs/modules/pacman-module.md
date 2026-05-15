@@ -12,8 +12,8 @@ It depends on the reusable game engine and browser client contracts, but owns th
 - `src/app/pacman/pacman-game-client.ts`: Pac-Man-specific browser client that translates keyboard events into Pac-Man events and renders serialized scenes.
 - `src/app/pacman/scenes`: scene factories for the match and menu.
 - `src/app/pacman/levels`: Pac-Man level definitions and parsing helpers.
-- `src/app/pacman/systems`: systems for round state, tile-aware movement, collection, death, HUD text, animation, and inactive experimental physics behavior.
-- `src/app/pacman/components`: actor, role, match state, HUD marker, level tile, collectible, and spawn marker components.
+- `src/app/pacman/systems`: systems for round state, tile-aware movement, collection, ghost mode/targeting/collision, HUD text, animation, and inactive experimental physics behavior.
+- `src/app/pacman/components`: actor, ghost, role, match state, HUD marker, level tile, collectible, and spawn marker components.
 - `src/app/pacman/factories`: helpers that compose Pac-Man entities from engine components.
 - `src/app/pacman/config`: frame-rate, controls, asset, tile, and sprite configuration.
 - `src/app/pacman/constants` and `src/app/pacman/interfaces`: Pac-Man-specific event, scene, actor, component, and system definitions.
@@ -26,7 +26,7 @@ It depends on the reusable game engine and browser client contracts, but owns th
 4. `PacmanGameScene` parses the compact classic level, generates wall/collectible/spawn entities, and places actors at map-defined spawn tiles.
 5. On each animation frame, the client drains buffered input events and maps supported keys into Pac-Man movement, pause, and restart events.
 6. `PacmanGame.update()` drains queued events. Restart requests rebuild the classic match scene immediately and discard other same-frame events.
-7. Active match updates run in order: round state, movement, collection, death, HUD, then animation.
+7. Active match updates run in order: round state, ghost mode, ghost targeting, movement, collection, ghost collision, HUD, then animation.
 8. The serialized game-state component carries score, lives, status, timers, remaining collectibles, and transient sound hooks.
 9. The client draws walls and collectibles as primitives, draws serialized UI and sprite components, and plays new serialized sound hooks through the audio driver.
 
@@ -50,7 +50,9 @@ It depends on the reusable game engine and browser client contracts, but owns th
 - Text-grid level rows preserve spaces; do not trim level rows before parsing.
 - Scene loading is currently static and marked for future dynamic loading; scene factories create fresh entities, managers, and systems for each load.
 - The classic match starts in `playing` state. Pause toggles only between `playing` and `paused`; respawn, win, and game-over ignore pause input.
-- Power pellets start a Pac-Man-level frightened timer, but full ghost identity and AI modes are deferred to the ghost-behavior milestone.
+- Power pellets start a Pac-Man-level frightened timer. Ghost components mirror that timer into per-ghost mode unless the ghost is eaten or returning home.
+- Ghost identity, release timing, scatter/chase/frightened/returning modes, and targeting rules live in Pac-Man components and systems. The generic engine does not own ghost AI.
+- The compact level exposes four deterministic ghost start slots by combining ordered `G` spawn tiles with ordered `H` house tiles. Scenes consume parsed slot metadata instead of hard-coding ghost positions.
 - Sound hooks are authored by Pac-Man systems as serialized state and consumed once by the client. Systems never call browser audio APIs directly.
 - The physics system exists alongside the movement system but is not currently wired into the active game scene; static maze collision remains tile-query based.
-- Collision events are deferred until another system needs a defined collision payload. Wall blocking is direct movement validation.
+- Player/ghost collision outcomes are handled by the Pac-Man ghost collision system. Wall blocking remains direct movement validation.

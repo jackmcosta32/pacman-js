@@ -38,4 +38,8 @@ export const PACMAN_SOUND_ASSETS: Record<IPacmanSoundEffect, IAsset> = {
     id: PACMAN_SOUND_EFFECT.DEATH,
     pathname: DEATH_SOUND_DATA_URL,
   },
+  [PACMAN_SOUND_EFFECT.GHOST_EATEN]: {
+    id: PACMAN_SOUND_EFFECT.GHOST_EATEN,
+    pathname: POWER_PELLET_SOUND_DATA_URL,
+  },
 };

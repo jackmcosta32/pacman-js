@@ -37,6 +37,13 @@ export interface IPacmanTileCoordinate {
   column: number;
 }
 
+export interface IPacmanGhostStartSlot {
+  spawnTile: IPacmanTile;
+  homeTile: IPacmanTile;
+  houseEntryTile: IPacmanTile;
+  houseExitTile: IPacmanTile;
+}
+
 export interface IPacmanLevelModel {
   id: string;
   name: string;
@@ -50,6 +57,9 @@ export interface IPacmanLevelModel {
   playerSpawn: IPacmanTile;
   ghostSpawns: IPacmanTile[];
   ghostHouseTiles: IPacmanTile[];
+  ghostStartSlots: IPacmanGhostStartSlot[];
+  ghostHouseEntryTile: IPacmanTile;
+  ghostHouseExitTile: IPacmanTile;
   tunnelTiles: IPacmanTile[];
 }
 

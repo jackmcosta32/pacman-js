@@ -10,11 +10,12 @@ import { PACMAN_EVENT_TYPE } from '@pacman/constants/pacman-event.constant';
 import { parsePacmanLevel } from '@pacman/levels/pacman-level.parser';
 import { PacmanRoleComponent } from '@pacman/components/pacman-role.component';
 import { PacmanActorComponent } from '@pacman/components/pacman-actor.component';
-import { PacmanDeathSystem } from '@pacman/systems/pacman-death.system';
+import { PacmanGhostComponent } from '@pacman/components/pacman-ghost.component';
 import { PacmanHudSystem } from '@pacman/systems/pacman-hud.system';
 import { PacmanHudComponent } from '@pacman/components/pacman-hud.component';
 import { PacmanMovementSystem } from '@pacman/systems/pacman-movement.system';
 import { PacmanRoundStateSystem } from '@pacman/systems/pacman-round-state.system';
+import { PacmanGhostCollisionSystem } from '@pacman/systems/pacman-ghost-collision.system';
 import { PacmanCollectionSystem } from '@pacman/systems/pacman-collection.system';
 import { PacmanLevelEntityFactory } from '@pacman/factories/pacman-level-entity.factory';
 import { PacmanGameStateComponent } from '@pacman/components/pacman-game-state.component';
@@ -25,8 +26,10 @@ import {
   PACMAN_ROUND_STATUS,
   PACMAN_SOUND_EFFECT,
 } from '@pacman/constants/pacman-game-state.constant';
+import { PACMAN_GHOST_ID, PACMAN_GHOST_MODE } from '@pacman/constants/pacman-ghost.constant';
 import type { IEvent } from '@shared/interfaces/event.interface';
 import type { ISceneState } from '@game-engine/interfaces/scene.interface';
+import type { IPacmanGhostMode } from '@pacman/interfaces/pacman-ghost.interface';
 import type { IPacmanLevelDefinition, IPacmanParsedLevel } from '@pacman/interfaces/pacman-level.interface';
 
 const sprite = { spriteSheetId: 'sprites', x: 0, y: 0, width: 10, height: 10 };
@@ -84,7 +87,11 @@ const makePlayer = (
   });
 };
 
-const makeGhost = (level: IPacmanParsedLevel, position = level.ghostSpawns[0].position) =>
+const makeGhost = (
+  level: IPacmanParsedLevel,
+  position = level.ghostSpawns[0].position,
+  mode: IPacmanGhostMode = PACMAN_GHOST_MODE.CHASE,
+) =>
   new Entity({
     id: 'ghost',
     components: [
@@ -92,6 +99,25 @@ const makeGhost = (level: IPacmanParsedLevel, position = level.ghostSpawns[0].po
       new PositionComponent({
         size: { width: level.tileSize, height: level.tileSize },
         position: { ...position },
+      }),
+      new PacmanActorComponent({
+        speed: 1,
+        direction: PACMAN_ACTOR_DIRECTION.LEFT,
+        requestedDirection: PACMAN_ACTOR_DIRECTION.LEFT,
+        movementState: PACMAN_ACTOR_MOVEMENT_STATE.WALKING,
+        actorSpriteMap: {},
+      }),
+      new PacmanGhostComponent({
+        ghostId: PACMAN_GHOST_ID.BLINKY,
+        mode,
+        previousMode: PACMAN_GHOST_MODE.CHASE,
+        spawnTile: { row: level.ghostSpawns[0].row, column: level.ghostSpawns[0].column },
+        homeTile: { row: level.ghostHouseEntryTile.row, column: level.ghostHouseEntryTile.column },
+        houseEntryTile: { row: level.ghostHouseEntryTile.row, column: level.ghostHouseEntryTile.column },
+        houseExitTile: { row: level.ghostHouseExitTile.row, column: level.ghostHouseExitTile.column },
+        scatterTargetTile: { row: 1, column: 1 },
+        released: true,
+        releaseDelayMs: 0,
       }),
       new SpriteComponent({ spriteFrames: sprite }),
     ],
@@ -132,15 +158,16 @@ describe('Pac-Man - Core rules systems', () => {
     const sceneState = makeSceneState([stateEntity, player, ghost, powerPellet as Entity]);
 
     new PacmanCollectionSystem().update(sceneState);
-    new PacmanDeathSystem().update(sceneState);
+    new PacmanGhostCollisionSystem().update(sceneState);
 
     expect(getGameState(stateEntity)).toMatchObject({
-      score: 50,
+      score: 250,
       lives: 3,
       remainingCollectibles: 1,
       status: PACMAN_ROUND_STATUS.PLAYING,
     });
     expect(getGameState(stateEntity).frightenedRemainingMs).toBeGreaterThan(0);
+    expect(ghost.getComponent(PacmanGhostComponent).mode).toBe(PACMAN_GHOST_MODE.RETURNING_HOME);
   });
 
   it('should freeze movement while paused', () => {
@@ -182,7 +209,7 @@ describe('Pac-Man - Core rules systems', () => {
     const sceneState = makeSceneState([stateEntity, player, ghost], 10);
 
     new PacmanRoundStateSystem({ level }).update(sceneState);
-    new PacmanDeathSystem().update(sceneState);
+    new PacmanGhostCollisionSystem().update(sceneState);
 
     expect(getGameState(stateEntity)).toMatchObject({
       frightenedRemainingMs: 0,
@@ -204,11 +231,49 @@ describe('Pac-Man - Core rules systems', () => {
     expect(getGameState(stateEntity).status).toBe(PACMAN_ROUND_STATUS.PLAYING);
     expect(getPosition(player)).toEqual(level.playerSpawn.position);
     expect(getPosition(ghost)).toEqual(level.ghostSpawns[0].position);
+    expect(ghost.getComponent(PacmanGhostComponent)).toMatchObject({
+      mode: PACMAN_GHOST_MODE.SCATTER,
+      released: true,
+      releaseElapsedMs: 0,
+    });
     expect(getActor(player)).toMatchObject({
       currentDirection: PACMAN_ACTOR_DIRECTION.DOWN,
       requestedDirection: PACMAN_ACTOR_DIRECTION.DOWN,
       movementState: PACMAN_ACTOR_MOVEMENT_STATE.IDLE,
     });
+  });
+
+  it('should ignore collisions with ghosts that are returning home', () => {
+    const level = parsePacmanLevel(levelDefinition);
+    const stateEntity = makeStateEntity();
+    const player = makePlayer(level);
+    const ghost = makeGhost(level, level.playerSpawn.position, PACMAN_GHOST_MODE.RETURNING_HOME);
+    const sceneState = makeSceneState([stateEntity, player, ghost]);
+
+    new PacmanGhostCollisionSystem().update(sceneState);
+
+    expect(getGameState(stateEntity)).toMatchObject({
+      lives: 3,
+      status: PACMAN_ROUND_STATUS.PLAYING,
+    });
+  });
+
+  it('should not let a restored normal ghost be eaten twice during the same frightened window', () => {
+    const level = parsePacmanLevel(levelDefinition);
+    const stateEntity = makeStateEntity({ frightenedRemainingMs: 1000, frightenedWindowId: 1 });
+    const player = makePlayer(level);
+    const ghost = makeGhost(level, level.playerSpawn.position, PACMAN_GHOST_MODE.CHASE);
+    const ghostComponent = ghost.getComponent(PacmanGhostComponent);
+    const sceneState = makeSceneState([stateEntity, player, ghost]);
+
+    ghostComponent.frightenedWindowId = 1;
+    new PacmanGhostCollisionSystem().update(sceneState);
+
+    expect(getGameState(stateEntity)).toMatchObject({
+      lives: 2,
+      status: PACMAN_ROUND_STATUS.RESPAWNING,
+    });
+    expect(ghostComponent.mode).toBe(PACMAN_GHOST_MODE.CHASE);
   });
 
   it('should set game over when the player dies with the last life', () => {
@@ -218,7 +283,7 @@ describe('Pac-Man - Core rules systems', () => {
     const ghost = makeGhost(level, level.playerSpawn.position);
     const sceneState = makeSceneState([stateEntity, player, ghost]);
 
-    new PacmanDeathSystem().update(sceneState);
+    new PacmanGhostCollisionSystem().update(sceneState);
 
     expect(getGameState(stateEntity)).toMatchObject({
       lives: 0,

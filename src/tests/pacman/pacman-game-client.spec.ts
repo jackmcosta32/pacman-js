@@ -400,7 +400,7 @@ describe('Pac-Man - PacmanGameClient', () => {
       ],
     });
 
-    expect(assetsDriver.loadAudio).toHaveBeenCalledTimes(4);
+    expect(assetsDriver.loadAudio).toHaveBeenCalledTimes(5);
     expect(audioDriver.play).toHaveBeenCalledTimes(3);
     expect(audioDriver.play).toHaveBeenNthCalledWith(1, 'start');
     expect(audioDriver.play).toHaveBeenNthCalledWith(2, 'pellet');
