@@ -318,11 +318,29 @@ describe('Pac-Man - Core rules systems', () => {
         new UIComponent({ innerText: 'old status' }),
       ],
     });
+    const overlayStatusHud = new Entity({
+      id: 'overlay-status-hud',
+      components: [
+        new PacmanHudComponent({ hudType: PACMAN_HUD_TYPE.OVERLAY_STATUS }),
+        new UIComponent({ innerText: 'old overlay status' }),
+      ],
+    });
+    const overlayPromptHud = new Entity({
+      id: 'overlay-prompt-hud',
+      components: [
+        new PacmanHudComponent({ hudType: PACMAN_HUD_TYPE.OVERLAY_PROMPT }),
+        new UIComponent({ innerText: 'old overlay prompt' }),
+      ],
+    });
 
-    new PacmanHudSystem().update(makeSceneState([stateEntity, scoreHud, livesHud, statusHud]));
+    new PacmanHudSystem().update(
+      makeSceneState([stateEntity, scoreHud, livesHud, statusHud, overlayStatusHud, overlayPromptHud]),
+    );
 
     expect(scoreHud.getComponent(UIComponent).innerText).toBe('SCORE 80');
     expect(livesHud.getComponent(UIComponent).innerText).toBe('LIVES 2');
     expect(statusHud.getComponent(UIComponent).innerText).toBe('PAUSED');
+    expect(overlayStatusHud.getComponent(UIComponent).innerText).toBe('PAUSED');
+    expect(overlayPromptHud.getComponent(UIComponent).innerText).toBe('P RESUME   R RESTART   ESC MENU');
   });
 });

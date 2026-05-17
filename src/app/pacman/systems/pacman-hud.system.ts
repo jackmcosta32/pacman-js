@@ -24,7 +24,10 @@ export class PacmanHudSystem extends System {
     });
   }
 
-  private getHudText(hudComponent: PacmanHudComponent, gameStateComponent: ReturnType<typeof getPacmanGameState>): string {
+  private getHudText(
+    hudComponent: PacmanHudComponent,
+    gameStateComponent: ReturnType<typeof getPacmanGameState>,
+  ): string {
     if (!gameStateComponent) return '';
 
     switch (hudComponent.hudType) {
@@ -34,6 +37,10 @@ export class PacmanHudSystem extends System {
         return `LIVES ${gameStateComponent.lives}`;
       case PACMAN_HUD_TYPE.STATUS:
         return this.getStatusText(gameStateComponent.status);
+      case PACMAN_HUD_TYPE.OVERLAY_STATUS:
+        return this.getOverlayStatusText(gameStateComponent.status);
+      case PACMAN_HUD_TYPE.OVERLAY_PROMPT:
+        return this.getOverlayPromptText(gameStateComponent.status, gameStateComponent.score);
     }
   }
 
@@ -47,6 +54,31 @@ export class PacmanHudSystem extends System {
         return 'YOU WIN';
       case PACMAN_ROUND_STATUS.GAME_OVER:
         return 'GAME OVER';
+      default:
+        return '';
+    }
+  }
+
+  private getOverlayStatusText(status: string): string {
+    switch (status) {
+      case PACMAN_ROUND_STATUS.PAUSED:
+        return 'PAUSED';
+      case PACMAN_ROUND_STATUS.WON:
+        return 'YOU WIN';
+      case PACMAN_ROUND_STATUS.GAME_OVER:
+        return 'GAME OVER';
+      default:
+        return '';
+    }
+  }
+
+  private getOverlayPromptText(status: string, score: number): string {
+    switch (status) {
+      case PACMAN_ROUND_STATUS.PAUSED:
+        return 'P RESUME   R RESTART   ESC MENU';
+      case PACMAN_ROUND_STATUS.WON:
+      case PACMAN_ROUND_STATUS.GAME_OVER:
+        return `SCORE ${score}   R RESTART   ESC MENU`;
       default:
         return '';
     }

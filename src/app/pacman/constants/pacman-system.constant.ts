@@ -1,5 +1,6 @@
 export const PACMAN_SYSTEM = {
   INPUT: 'input',
+  MENU: 'menu',
   HUD: 'hud',
   MOVEMENT: 'movement',
   PHYSICS: 'physics',

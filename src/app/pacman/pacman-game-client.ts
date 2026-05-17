@@ -3,6 +3,7 @@ import { PACMAN_EVENT_TYPE } from './constants/pacman-event.constant';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
 import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
+import { PACMAN_SCENE } from '@pacman/constants/pacman-scene.constant';
 import { ACTOR_SPRITES, MENU_FONT, PACMAN_SOUND_ASSETS } from '@pacman/config/pacman-asset.config';
 import type { ISerializedScene } from '@game-engine/interfaces/scene.interface';
 import type { IGameClient } from '@game-client/interfaces/game-client.interface';
@@ -15,8 +16,14 @@ import type { IPacmanEvent, IPacmanMovementRequestEvent } from '@pacman/interfac
 import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
 import { PACMAN_ACTOR_DIRECTION } from './constants/pacman-actor.constant';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
+import { PACMAN_MENU_NAVIGATION_DIRECTION } from '@pacman/constants/pacman-menu.constant';
 import type { ISerializedPacmanTileComponent } from '@pacman/components/pacman-tile.component';
-import type { IAssetsDriver, IAudioDriver, IGraphicsDriver, IInputDriver } from '@game-client/interfaces/driver.interface';
+import type {
+  IAssetsDriver,
+  IAudioDriver,
+  IGraphicsDriver,
+  IInputDriver,
+} from '@game-client/interfaces/driver.interface';
 import type { ISerializedPacmanCollectibleComponent } from '@pacman/components/pacman-collectible.component';
 import type { ISerializedPacmanGameStateComponent } from '@pacman/components/pacman-game-state.component';
 
@@ -37,6 +44,7 @@ export class PacmanGameClient implements IGameClient {
   private readonly graphicsDriver: IGraphicsDriver;
   private lastTimestamp = performance.now();
   private lastPlayedSoundHookId = 0;
+  private lastSoundHookEntityId?: string;
   private lifecycleToken = 0;
   private isRunning = false;
   private isSubscribed = false;
@@ -56,6 +64,8 @@ export class PacmanGameClient implements IGameClient {
     if (this.currentSceneId !== scene.id) {
       this.graphicsDriver.setResolution(scene.viewport);
       this.currentSceneId = scene.id;
+      this.lastPlayedSoundHookId = 0;
+      this.lastSoundHookEntityId = undefined;
     }
 
     this.graphicsDriver.clear({ x: 0, y: 0 });
@@ -76,6 +86,11 @@ export class PacmanGameClient implements IGameClient {
     ] as ISerializedPacmanGameStateComponent;
 
     if (!gameStateComponent) return;
+
+    if (this.lastSoundHookEntityId !== entity.id) {
+      this.lastPlayedSoundHookId = 0;
+      this.lastSoundHookEntityId = entity.id;
+    }
 
     const sortedSoundHooks = [...gameStateComponent.soundHooks].sort((left, right) => left.id - right.id);
     const latestSoundHook = sortedSoundHooks[sortedSoundHooks.length - 1];
@@ -145,6 +160,28 @@ export class PacmanGameClient implements IGameClient {
 
   private mapInputEvent(input: IInputEvent): IPacmanEvent | undefined {
     if (input.type === KEYBOARD_EVENT_TYPE.KEY_DOWN || input.type === KEYBOARD_EVENT_TYPE.KEY_PRESSED) {
+      if (this.currentSceneId === PACMAN_SCENE.MAIN_MENU) {
+        switch (input.keyCode) {
+          case INPUT_SCHEME.UP:
+          case INPUT_SCHEME.LEFT:
+            return {
+              type: PACMAN_EVENT_TYPE.MENU_NAVIGATE,
+              direction: PACMAN_MENU_NAVIGATION_DIRECTION.PREVIOUS,
+            };
+          case INPUT_SCHEME.DOWN:
+          case INPUT_SCHEME.RIGHT:
+            return {
+              type: PACMAN_EVENT_TYPE.MENU_NAVIGATE,
+              direction: PACMAN_MENU_NAVIGATION_DIRECTION.NEXT,
+            };
+          case INPUT_SCHEME.MENU_SELECT:
+          case INPUT_SCHEME.MENU_SELECT_ALT:
+            return {
+              type: PACMAN_EVENT_TYPE.MENU_SELECT,
+            };
+        }
+      }
+
       switch (input.keyCode) {
         case INPUT_SCHEME.UP:
           return {
@@ -173,6 +210,10 @@ export class PacmanGameClient implements IGameClient {
         case INPUT_SCHEME.RESTART:
           return {
             type: PACMAN_EVENT_TYPE.RESTART_REQUEST,
+          };
+        case INPUT_SCHEME.RETURN_TO_MENU:
+          return {
+            type: PACMAN_EVENT_TYPE.RETURN_TO_MENU_REQUEST,
           };
       }
     }
@@ -243,6 +284,7 @@ export class PacmanGameClient implements IGameClient {
 
     this.pendingStart = undefined;
     this.currentSceneId = undefined;
+    this.lastSoundHookEntityId = undefined;
     this.lastPlayedSoundHookId = 0;
     this.lastTimestamp = performance.now();
   }

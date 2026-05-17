@@ -22,4 +22,7 @@ export const INPUT_SCHEME = {
   RIGHT: 'ArrowRight',
   PAUSE: 'KeyP',
   RESTART: 'KeyR',
+  MENU_SELECT: 'Enter',
+  MENU_SELECT_ALT: 'Space',
+  RETURN_TO_MENU: 'Escape',
 };

@@ -7,6 +7,7 @@ export const PACMAN_COMPONENT_TYPE = {
   SPAWN_COMPONENT: 'pacman-spawn',
   HUD_COMPONENT: 'pacman-hud',
   ROLE_COMPONENT: 'pacman-role',
+  MENU_ITEM_COMPONENT: 'pacman-menu-item',
   GHOST_COMPONENT: 'pacman-ghost',
   GAME_STATE_COMPONENT: 'pacman-game-state',
   COLLECTIBLE_COMPONENT: 'pacman-collectible',

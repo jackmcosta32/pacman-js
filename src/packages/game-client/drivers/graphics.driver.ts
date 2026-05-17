@@ -39,10 +39,9 @@ export class GraphicsDriver implements IGraphicsDriver {
     const fontColor = options.color ?? 'white';
     const fontFamily = options.fontFamily ?? 'serif';
 
-    if (options.textAlign) this.context.textAlign = options.textAlign;
-    if (options.textBaseline) this.context.textBaseline = options.textBaseline;
-    if (options.textRendering) this.context.textRendering = options.textRendering;
-
+    this.context.textAlign = options.textAlign ?? 'start';
+    this.context.textBaseline = options.textBaseline ?? 'alphabetic';
+    this.context.textRendering = options.textRendering ?? 'auto';
     this.context.fillStyle = fontColor;
     this.context.strokeStyle = fontColor;
     this.context.font = `${fontSize}px ${fontFamily}`;

@@ -32,11 +32,7 @@ import type { IQueue } from '@shared/interfaces/queue.interface';
 import { PLAYER_SPEED } from '@pacman/config/pacman-game.config';
 import { PacmanGameStateComponent } from '@pacman/components/pacman-game-state.component';
 import { PACMAN_TILE_TYPE } from '@pacman/constants/pacman-level.constant';
-import {
-  PACMAN_GHOST_ID,
-  PACMAN_GHOST_CONFIG,
-  PACMAN_GHOST_BASE_SPEED,
-} from '@pacman/constants/pacman-ghost.constant';
+import { PACMAN_GHOST_ID, PACMAN_GHOST_CONFIG, PACMAN_GHOST_BASE_SPEED } from '@pacman/constants/pacman-ghost.constant';
 import { PACMAN_HUD_TYPE as PACMAN_GAME_HUD_TYPE } from '@pacman/constants/pacman-game-state.constant';
 import type { IPacmanParsedLevel, IPacmanTile } from '@pacman/interfaces/pacman-level.interface';
 import type { IPacmanGhostScatterCorner } from '@pacman/interfaces/pacman-ghost.interface';
@@ -81,6 +77,40 @@ export const createPacmanGameScene = (eventQueue: IQueue<IEvent>): Scene => {
     EntityFactory.with(new PacmanHudComponent({ hudType: PACMAN_GAME_HUD_TYPE.STATUS }))
       .with(new UIComponent({ color: '#f8e6b0', fontSize: 16, fontFamily: MENU_FONT.id, innerText: '' }))
       .with(new PositionComponent({ position: { x: 324, y: 18 }, size: { width: 160, height: 18 } }))
+      .make(),
+    EntityFactory.with(new PacmanHudComponent({ hudType: PACMAN_GAME_HUD_TYPE.OVERLAY_STATUS }))
+      .with(
+        new UIComponent({
+          color: '#f8e6b0',
+          fontSize: 32,
+          fontFamily: MENU_FONT.id,
+          innerText: '',
+          textAlign: 'center',
+        }),
+      )
+      .with(
+        new PositionComponent({
+          position: { x: Math.floor(level.size.width / 2), y: Math.floor(level.size.height / 2) - 36 },
+          size: { width: 240, height: 36 },
+        }),
+      )
+      .make(),
+    EntityFactory.with(new PacmanHudComponent({ hudType: PACMAN_GAME_HUD_TYPE.OVERLAY_PROMPT }))
+      .with(
+        new UIComponent({
+          color: 'white',
+          fontSize: 16,
+          fontFamily: MENU_FONT.id,
+          innerText: '',
+          textAlign: 'center',
+        }),
+      )
+      .with(
+        new PositionComponent({
+          position: { x: Math.floor(level.size.width / 2), y: Math.floor(level.size.height / 2) + 8 },
+          size: { width: 360, height: 18 },
+        }),
+      )
       .make(),
     PacmanPlayerEntityFactory.make({
       speed: PLAYER_SPEED,

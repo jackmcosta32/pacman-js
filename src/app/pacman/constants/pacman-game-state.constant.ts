@@ -15,6 +15,8 @@ export const PACMAN_HUD_TYPE = {
   SCORE: 'score',
   LIVES: 'lives',
   STATUS: 'status',
+  OVERLAY_STATUS: 'overlay-status',
+  OVERLAY_PROMPT: 'overlay-prompt',
 } as const;
 
 export const PACMAN_SOUND_EFFECT = {

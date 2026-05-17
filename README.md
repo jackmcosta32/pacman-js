@@ -38,10 +38,21 @@ http://localhost:3000
 
 ## Controls
 
+Menu:
+
+- Arrow Up / Arrow Left: move selection up.
+- Arrow Down / Arrow Right: move selection down.
+- Enter / Space: select menu item.
+
+Match:
+
 - Arrow Up: move up.
 - Arrow Down: move down.
 - Arrow Left: move left.
 - Arrow Right: move right.
+- P: pause or resume.
+- R: restart the match.
+- Escape: return to the main menu.
 
 ## Project Structure
 
@@ -76,11 +87,12 @@ flowchart LR
 
 1. `src/main.ts` creates the input, asset, and graphics drivers.
 2. `PacmanGameClient` loads assets, subscribes to game snapshots, reads keyboard input, and runs the animation loop.
-3. `PacmanGame` stores the active scene and queues client events.
-4. A `Scene` updates its systems with elapsed time, queued events, and the entity manager.
-5. Systems mutate component state, such as actor direction, position, and animation frame.
-6. The scene serializes entities and components.
-7. The client draws UI text and sprites from the serialized snapshot.
+3. `PacmanGame` stores the active scene, queues client events, and loads scenes through the Pac-Man scene registry.
+4. The app starts on the main menu; selecting Start loads a fresh classic match.
+5. A `Scene` updates its systems with elapsed time, queued events, and the entity manager.
+6. Systems mutate component state, such as actor direction, position, HUD prompts, and animation frame.
+7. The scene serializes entities and components.
+8. The client draws UI text and sprites from the serialized snapshot.
 
 ## Documentation
 

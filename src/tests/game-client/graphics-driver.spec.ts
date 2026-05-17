@@ -68,7 +68,11 @@ describe('Game Client - GraphicsDriver', () => {
     const assetsDriver = { getAsset: vi.fn() } as unknown as IAssetsDriver;
     const sut = new GraphicsDriver({ context, assetsDriver });
 
-    sut.drawRectangle({ x: 10, y: 12 }, { width: 20, height: 24 }, { fillColor: 'blue', strokeColor: 'white', lineWidth: 2 });
+    sut.drawRectangle(
+      { x: 10, y: 12 },
+      { width: 20, height: 24 },
+      { fillColor: 'blue', strokeColor: 'white', lineWidth: 2 },
+    );
 
     expect(context.fillStyle).toBe('blue');
     expect(context.strokeStyle).toBe('white');
@@ -89,5 +93,24 @@ describe('Game Client - GraphicsDriver', () => {
     expect(context.arc).toHaveBeenCalledWith(30, 32, 6, 0, Math.PI * 2);
     expect(context.fill).toHaveBeenCalled();
     expect(context.stroke).not.toHaveBeenCalled();
+  });
+
+  it('should reset text drawing defaults on every draw', () => {
+    const context = makeContext();
+    const assetsDriver = { getAsset: vi.fn() } as unknown as IAssetsDriver;
+    const sut = new GraphicsDriver({ context, assetsDriver });
+
+    sut.drawText(
+      'centered',
+      { x: 10, y: 12 },
+      { textAlign: 'center', textBaseline: 'middle', textRendering: 'geometricPrecision' },
+    );
+    sut.drawText('default', { x: 20, y: 24 });
+
+    expect(context.textAlign).toBe('start');
+    expect(context.textBaseline).toBe('alphabetic');
+    expect(context.textRendering).toBe('auto');
+    expect(context.fillText).toHaveBeenNthCalledWith(1, 'centered', 10, 12);
+    expect(context.fillText).toHaveBeenNthCalledWith(2, 'default', 20, 24);
   });
 });
