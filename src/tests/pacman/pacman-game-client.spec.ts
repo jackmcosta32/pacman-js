@@ -7,7 +7,9 @@ import { KEYBOARD_EVENT_TYPE } from '@shared/constants/event.constant';
 import type { IGame } from '@shared/interfaces/game.interface';
 import type { IInputEvent } from '@shared/interfaces/event.interface';
 import { COMPONENT_TYPE } from '@shared/constants/component.constant';
+import { GameClientDebugger } from '@game-client/game-client-debugger';
 import { PACMAN_COMPONENT_TYPE } from '@pacman/constants/pacman-component.constant';
+import { PACMAN_ROLE } from '@pacman/constants/pacman-game-state.constant';
 import { PACMAN_TILE_TYPE, PACMAN_COLLECTIBLE_TYPE } from '@pacman/constants/pacman-level.constant';
 import type {
   IAssetsDriver,
@@ -15,6 +17,7 @@ import type {
   IGraphicsDriver,
   IInputDriver,
 } from '@game-client/interfaces/driver.interface';
+import type { IGameClientDebugger } from '@game-client/interfaces/game-client-debugger.interface';
 import { PACMAN_ACTOR_DIRECTION } from '@pacman/constants/pacman-actor.constant';
 import { PACMAN_MENU_NAVIGATION_DIRECTION } from '@pacman/constants/pacman-menu.constant';
 
@@ -92,6 +95,21 @@ const makeGraphicsDriver = () =>
     drawRectangle: vi.fn(),
     setResolution: vi.fn(),
   }) as unknown as IGraphicsDriver;
+
+const makeGameClientDebugger = () =>
+  ({
+    log: vi.fn(),
+    toggle: vi.fn(() => true),
+    isEnabled: vi.fn(() => false),
+    recordFrame: vi.fn(),
+    recordSceneSnapshot: vi.fn(),
+    getOverlaySnapshot: vi.fn(() => ({
+      fps: 0,
+      sceneId: 'n/a',
+      entityCount: 0,
+      playerTile: 'n/a',
+    })),
+  }) as unknown as IGameClientDebugger;
 
 describe('Pac-Man - PacmanGameClient', () => {
   afterEach(() => {
@@ -353,6 +371,30 @@ describe('Pac-Man - PacmanGameClient', () => {
     expect(game.update).toHaveBeenCalledTimes(1);
   });
 
+  it('should toggle debug mode without forwarding the debug key to the game', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver([{ type: KEYBOARD_EVENT_TYPE.KEY_DOWN, keyCode: INPUT_SCHEME.DEBUG_TOGGLE }]);
+    const assetsDriver = makeAssetsDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const gameClientDebugger = makeGameClientDebugger();
+    const sut = new PacmanGameClient({
+      assetsDriver,
+      audioDriver: makeAudioDriver(),
+      game,
+      gameClientDebugger,
+      graphicsDriver,
+      inputDriver,
+    });
+
+    await sut.start();
+
+    expect(gameClientDebugger.toggle).toHaveBeenCalledTimes(1);
+    expect(gameClientDebugger.log).toHaveBeenCalledWith('info', 'Debug overlay enabled');
+    expect(game.readClientEvent).not.toHaveBeenCalled();
+  });
+
   it('should draw walls, collectibles, and actors in scene order groups', async () => {
     installAnimationFrameMock();
 
@@ -443,6 +485,158 @@ describe('Pac-Man - PacmanGameClient', () => {
     );
     expect(vi.mocked(graphicsDriver.drawCircle).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(graphicsDriver.drawSprite).mock.invocationCallOrder[0],
+    );
+  });
+
+  it('should render debug boxes, tile labels, and overlay when debug mode is enabled', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver();
+    const assetsDriver = makeAssetsDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const gameClientDebugger = new GameClientDebugger({ enabled: true });
+    const sut = new PacmanGameClient({
+      assetsDriver,
+      audioDriver: makeAudioDriver(),
+      game,
+      gameClientDebugger,
+      graphicsDriver,
+      inputDriver,
+    });
+
+    await sut.start();
+
+    const sceneListener = vi.mocked(game.subscribe).mock.calls[0][0];
+
+    sceneListener({
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'tile',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 0, y: 0 },
+              boundingBox: { x: 0, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 24, y: 24 },
+            },
+            [PACMAN_COMPONENT_TYPE.TILE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.TILE_COMPONENT,
+              row: 0,
+              column: 0,
+              symbol: '#',
+              walkable: false,
+              blocking: true,
+              tileType: PACMAN_TILE_TYPE.WALL,
+            },
+          },
+        },
+        {
+          id: 'player',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 0, y: 0 },
+              boundingBox: { x: 0, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 24, y: 24 },
+            },
+            [PACMAN_COMPONENT_TYPE.ROLE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.ROLE_COMPONENT,
+              role: PACMAN_ROLE.PLAYER,
+            },
+          },
+        },
+        {
+          id: 'ui',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 0, y: 0 },
+              boundingBox: { x: 0, y: 0, width: 48, height: 18 },
+              centerPosition: { x: 24, y: 9 },
+            },
+            [COMPONENT_TYPE.UI_COMPONENT]: {
+              type: COMPONENT_TYPE.UI_COMPONENT,
+              innerText: 'SCORE 0',
+            },
+          },
+        },
+      ],
+    });
+
+    expect(graphicsDriver.drawRectangle).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: 0, y: 0, width: 48, height: 48 },
+      { strokeColor: 'rgba(255, 64, 64, 0.85)', lineWidth: 1 },
+    );
+    expect(graphicsDriver.drawText).toHaveBeenCalledWith(
+      '0,0',
+      { x: 3, y: 10 },
+      { color: 'rgba(255, 255, 255, 0.75)', fontFamily: 'monospace', fontSize: 8 },
+    );
+    expect(graphicsDriver.drawText).toHaveBeenCalledWith(
+      'PLAYER TILE 0,0',
+      { x: 8, y: 82 },
+      { color: '#8cffb2', fontFamily: 'monospace', fontSize: 11 },
+    );
+    expect(graphicsDriver.drawRectangle).not.toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: 0, y: 0, width: 48, height: 18 },
+      { strokeColor: 'rgba(255, 64, 64, 0.85)', lineWidth: 1 },
+    );
+  });
+
+  it('should show n/a when debug mode cannot resolve the player tile', async () => {
+    installAnimationFrameMock();
+
+    const game = makeGame();
+    const inputDriver = makeInputDriver();
+    const assetsDriver = makeAssetsDriver();
+    const graphicsDriver = makeGraphicsDriver();
+    const gameClientDebugger = new GameClientDebugger({ enabled: true });
+    const sut = new PacmanGameClient({
+      assetsDriver,
+      audioDriver: makeAudioDriver(),
+      game,
+      gameClientDebugger,
+      graphicsDriver,
+      inputDriver,
+    });
+
+    await sut.start();
+
+    const sceneListener = vi.mocked(game.subscribe).mock.calls[0][0];
+
+    sceneListener({
+      id: 'classic-match',
+      size: { width: 96, height: 48 },
+      viewport: { width: 96, height: 48 },
+      entities: [
+        {
+          id: 'player',
+          components: {
+            [COMPONENT_TYPE.POSITION_COMPONENT]: {
+              type: COMPONENT_TYPE.POSITION_COMPONENT,
+              position: { x: 0, y: 0 },
+              boundingBox: { x: 0, y: 0, width: 48, height: 48 },
+              centerPosition: { x: 24, y: 24 },
+            },
+            [PACMAN_COMPONENT_TYPE.ROLE_COMPONENT]: {
+              type: PACMAN_COMPONENT_TYPE.ROLE_COMPONENT,
+              role: PACMAN_ROLE.PLAYER,
+            },
+          },
+        },
+      ],
+    });
+
+    expect(graphicsDriver.drawText).toHaveBeenCalledWith(
+      'PLAYER TILE n/a',
+      { x: 8, y: 82 },
+      { color: '#8cffb2', fontFamily: 'monospace', fontSize: 11 },
     );
   });
 

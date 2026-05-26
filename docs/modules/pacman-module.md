@@ -17,6 +17,7 @@ It depends on the reusable game engine and browser client contracts, but owns th
 - `src/app/pacman/factories`: helpers that compose Pac-Man entities from engine components.
 - `src/app/pacman/config`: frame-rate, controls, asset, tile, and sprite configuration.
 - `src/app/pacman/constants` and `src/app/pacman/interfaces`: Pac-Man-specific event, scene, actor, component, and system definitions.
+- `src/packages/game-client/game-client-debugger.ts`: optional client debugger injected into the Pac-Man browser client.
 
 ## How It Works
 
@@ -30,7 +31,8 @@ It depends on the reusable game engine and browser client contracts, but owns th
 8. `PacmanGameScene` parses the compact classic level, generates wall/collectible/spawn entities, and places actors at map-defined spawn tiles.
 9. Active match updates run in order: round state, ghost mode, ghost targeting, movement, collection, ghost collision, HUD, then animation.
 10. The serialized game-state component carries score, lives, status, timers, remaining collectibles, and transient sound hooks.
-11. The client draws walls and collectibles as primitives, draws serialized UI and sprite components, and plays new serialized sound hooks through the audio driver.
+11. The client draws walls and collectibles as primitives, draws serialized UI and sprite components, and optionally draws debug overlay state from serialized entities.
+12. The client plays new serialized sound hooks through the audio driver.
 
 ## Dependencies
 
@@ -60,3 +62,4 @@ It depends on the reusable game engine and browser client contracts, but owns th
 - Sound hooks are authored by Pac-Man systems as serialized state and consumed once by the client. Systems never call browser audio APIs directly.
 - The physics system exists alongside the movement system but is not currently wired into the active game scene; static maze collision remains tile-query based.
 - Player/ghost collision outcomes are handled by the Pac-Man ghost collision system. Wall blocking remains direct movement validation.
+- Press Backquote to toggle debug rendering. The overlay is client-only and does not change engine state.

@@ -303,7 +303,7 @@ Make the project easier to evolve after the game is playable.
 - Add docs for adding a new system.
 - Add docs for adding a new component.
 - Add visual smoke testing once the canvas output is stable.
-- Clean up naming typos such as `muti-subject-observer`.
+- Clean up naming typos in shared observer helpers.
 - Review unused constants and components.
 
 ### Exit Criteria

@@ -9,7 +9,7 @@ The shared module provides framework-agnostic types, constants, interfaces, data
 - `src/packages/shared/constants`: shared component and input event type identifiers.
 - `src/packages/shared/interfaces`: contracts for assets, coordinates, events, game state, geometry, graphics, observers, queues, and ring buffers.
 - `src/packages/shared/data-structures`: `Queue`, `RingBuffer`, and `QuadTree`.
-- `src/packages/shared/patterns`: observer helpers.
+- `src/packages/shared/patterns`: observer and multi-subject observer helpers.
 - `src/packages/shared/utils`: reusable helpers such as sprite-frame extraction.
 - `src/packages/shared/types`: generic utility types.
 
@@ -18,7 +18,7 @@ The shared module provides framework-agnostic types, constants, interfaces, data
 1. Engine, client, and application modules import shared contracts instead of duplicating cross-module shapes.
 2. Runtime buffering uses `RingBuffer` and `Queue` for input and game event flow.
 3. Spatial lookup experiments use `QuadTree` to store and query entity bounding boxes.
-4. Observer helpers provide a small subscription/notification primitive for game snapshot updates.
+4. Observer helpers provide small subscription/notification primitives for game snapshot updates and future multi-subject event streams.
 5. Graphics utilities and interfaces describe sprite sheets, sprite frames, typography, and renderable asset metadata.
 
 ## Dependencies

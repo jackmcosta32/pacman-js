@@ -35,6 +35,7 @@ http://localhost:3000
 - `pnpm build`: run TypeScript and create a production build.
 - `pnpm test`: run the Vitest test suite.
 - `pnpm preview`: preview the production build locally.
+- `pnpm test:smoke`: build the app, start Vite preview, and run the Playwright canvas smoke flow.
 
 ## Controls
 
@@ -53,6 +54,10 @@ Match:
 - P: pause or resume.
 - R: restart the match.
 - Escape: return to the main menu.
+
+Debug:
+
+- Backquote: toggle the client debug overlay with FPS, scene id, entity count, player tile, collision boxes, and tile boundaries.
 
 ## Project Structure
 
@@ -93,6 +98,7 @@ flowchart LR
 6. Systems mutate component state, such as actor direction, position, HUD prompts, and animation frame.
 7. The scene serializes entities and components.
 8. The client draws UI text and sprites from the serialized snapshot.
+9. Optional debug rendering is derived from the serialized snapshot and drawn only in the browser client.
 
 ## Documentation
 
@@ -106,6 +112,8 @@ The most important docs are:
 - [Shared module](./docs/modules/shared-module.md)
 - [Entity-component-system pattern](./docs/patterns/game/entity-component-system-pattern.md)
 - [Scene serialization pattern](./docs/patterns/game/scene-serialization-pattern.md)
+- [Component authoring pattern](./docs/patterns/game/component-authoring-pattern.md)
+- [System authoring pattern](./docs/patterns/game/system-authoring-pattern.md)
 - [Client driver pattern](./docs/patterns/client/client-driver-pattern.md)
 
 ## Development Notes
@@ -116,3 +124,4 @@ The most important docs are:
 - Keep framework-agnostic types, data structures, and constants under `src/packages/shared`.
 - Prefer adding new behavior as components and systems instead of coupling feature logic directly into the client.
 - Preserve the serialized scene boundary between the game runtime and renderer.
+- Keep debug rendering client-only unless gameplay systems need explicit debug state.

@@ -2,6 +2,14 @@
 
 Use this checklist after client runtime changes that touch input, assets, graphics, or game loop lifecycle.
 
+Prefer the automated smoke check when Playwright browsers are available:
+
+```sh
+pnpm test:smoke
+```
+
+The automated check builds the app, serves the production bundle through Vite preview, verifies that the canvas is nonblank, and exercises menu start, movement, pause, and return-to-menu transitions through canvas output changes.
+
 ## Checklist
 
 1. Start the Vite app and confirm the main menu appears without console errors.
@@ -16,8 +24,10 @@ Use this checklist after client runtime changes that touch input, assets, graphi
 10. Check the canvas on normal and high-DPI displays; sprites and text should stay crisp and keep the expected logical size.
 11. Confirm the maze walls and pellets are visible.
 12. Confirm the player and ghost start on map-defined spawn tiles, not the old hard-coded empty-canvas positions.
-13. Temporarily point one configured asset to a missing path and confirm startup fails with an error that includes the asset id and path.
-14. Restore the asset path and confirm startup succeeds again.
+13. Press Backquote and confirm the debug overlay appears with FPS, scene id, entity count, and player tile.
+14. Confirm debug collision boxes and tile boundaries appear only while debug mode is enabled.
+15. Temporarily point one configured asset to a missing path and confirm startup fails with an error that includes the asset id and path.
+16. Restore the asset path and confirm startup succeeds again.
 
 ## Notes
 
@@ -26,3 +36,4 @@ Use this checklist after client runtime changes that touch input, assets, graphi
 - Canvas dimensions are scaled for `devicePixelRatio`; game coordinates remain logical scene coordinates.
 - Level rows preserve spaces; visible maze state should come from parsed level data.
 - Audio hooks are consumed from serialized match state and reset when the scene id changes.
+- Debug input is handled by the browser client and is not forwarded to the game event queue.

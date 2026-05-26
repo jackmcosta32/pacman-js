@@ -56,6 +56,33 @@ Tunnel wrapping is valid only when an actor crosses the level boundary from a tu
 
 Ghost start slots are deterministic parser output. The compact map can define one `G` tile plus three `H` tiles; the parser exposes those four ordered slots to the scene, along with the center house tile as the house entry and the first `G` tile as the house exit.
 
+Validation rules are enforced by `parsePacmanLevel()`:
+
+- A level must include at least one row.
+- Every row must have the same width.
+- `tileSize` must be greater than zero.
+- Unsupported symbols fail parsing with the row and column.
+- A level must include exactly one player spawn.
+- A level must include at least one ghost spawn and at least one ghost-house tile.
+- Tunnel tiles must appear as either zero tiles or exactly two paired tiles.
+
+Small valid example:
+
+```ts
+const LEVEL = {
+  id: 'debug-example',
+  name: 'Debug Example',
+  tileSize: 16,
+  rows: [
+    '#####',
+    '#P.o#',
+    '# G #',
+    '#HHH#',
+    '#####',
+  ],
+};
+```
+
 ## Checklist
 
 1. Keep every row the same length.

@@ -11,7 +11,7 @@ The game client module contains browser-facing drivers and client contracts. It 
 - `src/packages/game-client/drivers/graphics.driver.ts`: draws sprites, text, and primitive shapes to a Canvas 2D context and manages canvas resolution.
 - `src/packages/game-client/drivers/audio.driver.ts`: replays cached audio assets by id.
 - `src/packages/game-client/interfaces`: driver, client, and debugger contracts.
-- `src/packages/game-client/game-client-debugger.ts`: debugging support for game client state.
+- `src/packages/game-client/game-client-debugger.ts`: toggleable runtime debugging support for frame, scene, entity, and player-tile state.
 
 ## How It Works
 
@@ -21,7 +21,8 @@ The game client module contains browser-facing drivers and client contracts. It 
 4. The Pac-Man client subscribes to serialized scene snapshots from the game runtime.
 5. On every client update, the input driver drains buffered keyboard events in insertion order.
 6. The graphics driver clears the canvas in logical scene coordinates, draws primitive wall and collectible shapes, draws serialized text components, and draws serialized sprite components.
-7. The Pac-Man client reads serialized sound hooks from game state and asks the audio driver to play each new hook once.
+7. When debug mode is enabled, the Pac-Man client draws debug collision boxes, tile boundaries, tile coordinates, and overlay metrics from the serialized scene.
+8. The Pac-Man client reads serialized sound hooks from game state and asks the audio driver to play each new hook once.
 
 ## Dependencies
 
@@ -38,3 +39,4 @@ The game client module contains browser-facing drivers and client contracts. It 
 - The graphics driver scales the physical canvas by `devicePixelRatio` while preserving logical scene coordinates.
 - Primitive drawing methods accept framework-agnostic style values such as `fillColor`, `strokeColor`, and `lineWidth`; Pac-Man tile semantics stay in the Pac-Man client.
 - The asset driver loads and caches assets only. Audio playback belongs to the audio driver and is triggered by feature clients from serialized game events or state.
+- Debug rendering uses existing graphics primitives. Generic drivers do not import Pac-Man constants.

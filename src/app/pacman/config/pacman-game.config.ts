@@ -25,4 +25,5 @@ export const INPUT_SCHEME = {
   MENU_SELECT: 'Enter',
   MENU_SELECT_ALT: 'Space',
   RETURN_TO_MENU: 'Escape',
+  DEBUG_TOGGLE: 'Backquote',
 };

@@ -107,7 +107,7 @@ Verification:
 
 ### M8.7 Clean Naming And Dead Code
 
-- Fix typos such as `muti-subject-observer`.
+- Fix naming typos in shared observer helpers.
 - Remove unused constants, components, systems, and helpers.
 - Keep renames scoped and covered by imports/tests.
 

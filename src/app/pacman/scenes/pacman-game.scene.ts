@@ -55,7 +55,6 @@ const getScatterTargetTile = (level: IPacmanParsedLevel, corner: IPacmanGhostSca
   return level.getTileAt(row, column) ?? level.playerSpawn;
 };
 
-// TODO: How can I load a scene dynamically?
 export const createPacmanGameScene = (eventQueue: IQueue<IEvent>): Scene => {
   const level = parsePacmanLevel(PACMAN_CLASSIC_LEVEL);
   const collectibleCount =

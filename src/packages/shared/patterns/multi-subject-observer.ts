@@ -10,6 +10,7 @@ export abstract class MultiSubjectObserver implements IMultiSubjectObserver {
     if (listeners.has(listener)) return false;
 
     listeners.add(listener);
+    this.subscriptions.set(event, listeners);
 
     return true;
   }
@@ -24,9 +25,9 @@ export abstract class MultiSubjectObserver implements IMultiSubjectObserver {
     return true;
   }
 
-  protected notify(event: string, data: Parameters<Callback>) {
+  protected notify(event: string, ...data: Parameters<Callback>) {
     const listeners = this.subscriptions.get(event);
 
-    listeners?.forEach((listener) => listener(data));
+    listeners?.forEach((listener) => listener(...data));
   }
 }
